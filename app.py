@@ -3,6 +3,7 @@ import pywencai
 import pandas as pd
 import json
 import math
+import re
 from openai import OpenAI
 
 app = Flask(__name__)
@@ -135,6 +136,237 @@ def screen():
         val = data.get("turnover_val", "1")
         conditions.append(f"换手率{op}{val}%")
 
+    # === 新增：成长质量 ===
+    if data.get("net_profit_enabled"):
+        op = data.get("net_profit_op", "大于")
+        val = data.get("net_profit_val", "5")
+        unit = data.get("net_profit_unit", "亿")
+        conditions.append(f"归母净利润{op}{val}{unit}")
+
+    if data.get("net_profit_growth_enabled"):
+        op = data.get("net_profit_growth_op", "大于")
+        val = data.get("net_profit_growth_val", "10")
+        conditions.append(f"归母净利润同比增长率{op}{val}%")
+
+    if data.get("cont_growth_enabled"):
+        val = data.get("cont_growth_val", "3")
+        conditions.append(f"连续{val}年扣非净利润增长")
+
+    if data.get("roa_enabled"):
+        roa_min = data.get("roa_min", "5")
+        roa_max = data.get("roa_max", "100")
+        conditions.append(f"总资产报酬率大于{roa_min}%且总资产报酬率小于{roa_max}%")
+
+    if data.get("rd_ratio_enabled"):
+        op = data.get("rd_ratio_op", "大于")
+        val = data.get("rd_ratio_val", "5")
+        conditions.append(f"研发费用占营收比例{op}{val}%")
+
+    # === 新增：估值进阶 ===
+    if data.get("peg_enabled"):
+        peg_min = data.get("peg_min", "0")
+        peg_max = data.get("peg_max", "1.5")
+        conditions.append(f"PEG大于{peg_min}且PEG小于{peg_max}")
+
+    if data.get("pcf_enabled"):
+        pcf_min = data.get("pcf_min", "0")
+        pcf_max = data.get("pcf_max", "20")
+        conditions.append(f"市现率大于{pcf_min}且市现率小于{pcf_max}")
+
+    if data.get("float_mcap_enabled"):
+        fm_min = data.get("float_mcap_min", "50")
+        fm_max = data.get("float_mcap_max", "2000")
+        unit = data.get("float_mcap_unit", "亿")
+        conditions.append(f"流通市值大于{fm_min}{unit}且流通市值小于{fm_max}{unit}")
+
+    # === 新增：资金与筹码 ===
+    if data.get("holders_change_enabled"):
+        htype = data.get("holders_change_type", "减少")
+        conditions.append(f"最新一期股东人数{htype}")
+
+    if data.get("north_fund_enabled"):
+        op = data.get("north_fund_op", "大于")
+        val = data.get("north_fund_val", "0")
+        conditions.append(f"北向资金持股比例{op}{val}%")
+
+    if data.get("fund_hold_enabled"):
+        op = data.get("fund_hold_op", "大于")
+        val = data.get("fund_hold_val", "5")
+        conditions.append(f"基金持仓占比{op}{val}%")
+
+    if data.get("main_fund_enabled"):
+        mtype = data.get("main_fund_type", "净流入")
+        conditions.append(f"今日主力资金{mtype}")
+
+    if data.get("volume_ratio_enabled"):
+        op = data.get("volume_ratio_op", "大于")
+        val = data.get("volume_ratio_val", "1.5")
+        conditions.append(f"量比{op}{val}")
+
+    # === 新增：风险筛选 ===
+    if data.get("pledge_enabled"):
+        op = data.get("pledge_op", "小于")
+        val = data.get("pledge_val", "30")
+        conditions.append(f"质押比例{op}{val}%")
+
+    if data.get("board_enabled"):
+        val = data.get("board_val", "主板")
+        conditions.append(f"上市板块为{val}")
+
+    if data.get("no_st_enabled"):
+        conditions.append("非ST")
+
+    # === 新增：技术面 ===
+    if data.get("above_ma_enabled"):
+        val = data.get("above_ma_val", "20")
+        conditions.append(f"股价站上{val}日均线")
+
+    if data.get("amplitude_enabled"):
+        op = data.get("amplitude_op", "小于")
+        val = data.get("amplitude_val", "5")
+        conditions.append(f"今日振幅{op}{val}%")
+
+    if data.get("concept_enabled"):
+        val = data.get("concept_val", "")
+        if val:
+            conditions.append(f"所属概念包含{val}")
+
+    # === 盈利质量 ===
+    if data.get("cash_content_enabled"):
+        op = data.get("cash_content_op", "大于")
+        val = data.get("cash_content_val", "80")
+        conditions.append(f"净利润现金含量{op}{val}%")
+
+    if data.get("ar_turnover_enabled"):
+        op = data.get("ar_turnover_op", "大于")
+        val = data.get("ar_turnover_val", "5")
+        conditions.append(f"应收账款周转率{op}{val}")
+
+    if data.get("inv_turnover_enabled"):
+        op = data.get("inv_turnover_op", "大于")
+        val = data.get("inv_turnover_val", "3")
+        conditions.append(f"存货周转率{op}{val}")
+
+    if data.get("sell_expense_enabled"):
+        op = data.get("sell_expense_op", "小于")
+        val = data.get("sell_expense_val", "20")
+        conditions.append(f"销售费用率{op}{val}%")
+
+    if data.get("fin_expense_enabled"):
+        op = data.get("fin_expense_op", "小于")
+        val = data.get("fin_expense_val", "5")
+        conditions.append(f"财务费用率{op}{val}%")
+
+    # === 价值投资 ===
+    if data.get("fcf_enabled"):
+        fcf_type = data.get("fcf_type", "为正")
+        conditions.append(f"自由现金流{fcf_type}")
+
+    if data.get("ev_ebitda_enabled"):
+        ev_min = data.get("ev_ebitda_min", "0")
+        ev_max = data.get("ev_ebitda_max", "15")
+        conditions.append(f"EV/EBITDA大于{ev_min}且EV/EBITDA小于{ev_max}")
+
+    if data.get("roic_enabled"):
+        op = data.get("roic_op", "大于")
+        val = data.get("roic_val", "10")
+        conditions.append(f"ROIC{op}{val}%")
+
+    if data.get("payout_enabled"):
+        op = data.get("payout_op", "大于")
+        val = data.get("payout_val", "30")
+        conditions.append(f"分红率{op}{val}%")
+
+    if data.get("cont_dividend_enabled"):
+        val = data.get("cont_dividend_val", "5")
+        conditions.append(f"连续{val}年分红")
+
+    # === 分析师预期 ===
+    if data.get("consensus_growth_enabled"):
+        op = data.get("consensus_growth_op", "大于")
+        val = data.get("consensus_growth_val", "20")
+        conditions.append(f"机构预测净利增速{op}{val}%")
+
+    if data.get("research_count_enabled"):
+        op = data.get("research_count_op", "大于")
+        val = data.get("research_count_val", "5")
+        conditions.append(f"近三个月机构调研次数{op}{val}")
+
+    if data.get("analyst_rating_enabled"):
+        val = data.get("analyst_rating_val", "买入")
+        conditions.append(f"最新评级为{val}")
+
+    if data.get("forecast_type_enabled"):
+        val = data.get("forecast_type_val", "预增")
+        conditions.append(f"业绩预告类型为{val}")
+
+    # === 资金进阶 ===
+    if data.get("margin_enabled"):
+        mtype = data.get("margin_type", "融资净买入")
+        conditions.append(f"今日{mtype}")
+
+    if data.get("shareholder_reduce_enabled"):
+        conditions.append("近三个月无大股东减持")
+
+    if data.get("unlock_enabled"):
+        op = data.get("unlock_op", "小于")
+        val = data.get("unlock_val", "5")
+        conditions.append(f"未来一个月解禁比例{op}{val}%")
+
+    if data.get("buyback_enabled"):
+        conditions.append("有回购计划")
+
+    if data.get("index_member_enabled"):
+        val = data.get("index_member_val", "沪深300")
+        conditions.append(f"属于{val}成分股")
+
+    # === 技术面进阶 ===
+    if data.get("macd_enabled"):
+        val = data.get("macd_val", "金叉")
+        period = data.get("macd_period", "日线")
+        conditions.append(f"{period}MACD{val}")
+
+    if data.get("rsi_enabled"):
+        rsi_min = data.get("rsi_min", "30")
+        rsi_max = data.get("rsi_max", "70")
+        conditions.append(f"RSI大于{rsi_min}且RSI小于{rsi_max}")
+
+    if data.get("new_high_enabled"):
+        val = data.get("new_high_val", "60")
+        conditions.append(f"创{val}日新高")
+
+    if data.get("drawdown_enabled"):
+        op = data.get("drawdown_op", "大于")
+        val = data.get("drawdown_val", "30")
+        conditions.append(f"距离250日高点回撤{op}{val}%")
+
+    if data.get("vol_break_enabled"):
+        val = data.get("vol_break_val", "2")
+        conditions.append(f"今日成交量大于5日均量的{val}倍")
+
+    # === 风险进阶 ===
+    if data.get("audit_enabled"):
+        conditions.append("审计意见为标准无保留意见")
+
+    if data.get("controller_enabled"):
+        val = data.get("controller_val", "国企")
+        conditions.append(f"实际控制人性质为{val}")
+
+    if data.get("interest_debt_enabled"):
+        op = data.get("interest_debt_op", "小于")
+        val = data.get("interest_debt_val", "40")
+        conditions.append(f"有息负债率{op}{val}%")
+
+    if data.get("single_q_revenue_enabled"):
+        op = data.get("single_q_revenue_op", "大于")
+        val = data.get("single_q_revenue_val", "20")
+        conditions.append(f"单季度营收同比增速{op}{val}%")
+
+    if data.get("single_q_profit_enabled"):
+        op = data.get("single_q_profit_op", "大于")
+        val = data.get("single_q_profit_val", "20")
+        conditions.append(f"单季度扣非净利同比增速{op}{val}%")
+
     # 自定义条件
     if data.get("custom"):
         conditions.append(data["custom"])
@@ -144,25 +376,34 @@ def screen():
 
     query = " 且 ".join(conditions)
 
-    # 先用筛选条件查，再单独查显示字段
-    try:
-        result = pywencai.get(query=query)
-    except Exception as e:
-        return jsonify({"error": f"查询失败: {str(e)}"}), 500
+    # 从 pywencai 结果中提取 DataFrame
+    def extract_df(result):
+        if result is None:
+            return None
+        if isinstance(result, pd.DataFrame):
+            return result if not result.empty else None
+        if isinstance(result, dict):
+            for v in result.values():
+                if isinstance(v, pd.DataFrame) and not v.empty:
+                    return v
+        return None
 
-    if result is None:
-        return jsonify({"query": query, "data": [], "total": 0})
-
-    df = result
-    if isinstance(result, dict):
-        for v in result.values():
-            if isinstance(v, pd.DataFrame):
-                df = v
+    # 先用筛选条件查，带重试
+    df = None
+    last_err = None
+    for attempt in range(2):
+        try:
+            result = pywencai.get(query=query)
+            df = extract_df(result)
+            if df is not None:
                 break
-        else:
-            return jsonify({"query": query, "data": [], "total": 0})
+        except Exception as e:
+            last_err = str(e)
+            continue
 
-    if not isinstance(df, pd.DataFrame) or df.empty:
+    if df is None:
+        if last_err:
+            return jsonify({"error": f"问财查询暂时不可用，请稍后再试（{last_err}）"}), 500
         return jsonify({"query": query, "data": [], "total": 0})
 
     # 尝试追加更多显示字段（第二次查询）
@@ -176,15 +417,9 @@ def screen():
     )
     try:
         extra_result = pywencai.get(query=extra_query)
-        if extra_result is not None:
-            extra_df = extra_result
-            if isinstance(extra_result, dict):
-                for v in extra_result.values():
-                    if isinstance(v, pd.DataFrame):
-                        extra_df = v
-                        break
-            if isinstance(extra_df, pd.DataFrame) and not extra_df.empty:
-                df = extra_df
+        extra_df = extract_df(extra_result)
+        if extra_df is not None:
+            df = extra_df
     except Exception:
         pass  # 追加字段失败就用原始结果
 
@@ -195,7 +430,6 @@ def screen():
     for c in df.columns:
         short = c
         # 去掉日期后缀 [20251231] [20260414] 等
-        import re
         short = re.sub(r'\[\d{8}\]', '', short).strip()
         # 常见长名缩短
         replacements = {
@@ -230,6 +464,11 @@ def screen():
         col_rename[c] = short
     df = df.rename(columns=col_rename)
 
+    # 删除无用列
+    drop_cols = [c for c in df.columns if c.lower() in ('market_code', 'code', 'market_code')]
+    if drop_cols:
+        df = df.drop(columns=drop_cols, errors='ignore')
+
     def clean_value(v):
         if v is None:
             return None
@@ -238,6 +477,15 @@ def screen():
         # 浮点数保留2位
         if isinstance(v, float):
             return round(v, 2)
+        # 字符串数字也转成float并round
+        if isinstance(v, str):
+            try:
+                f = float(v)
+                if math.isnan(f) or math.isinf(f):
+                    return None
+                return round(f, 2)
+            except (ValueError, TypeError):
+                pass
         return v
 
     clean_data = [[clean_value(cell) for cell in row] for row in df.values.tolist()]
