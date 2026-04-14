@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>超级无敌筛选赚钱大神器 - A股选股器 | AI智能选股 股票筛选 DeepSeek分析</title>
+<title>A股智能选股器 | AI智能选股 股票筛选 DeepSeek分析</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
 <!-- SEO Meta -->
 <meta name="description" content="超级无敌筛选赚钱大神器，基于同花顺问财和DeepSeek AI的A股智能选股工具。支持营业总收入、扣非净利润、经营现金流、市盈率PE、市净率PB、市销率PS、商誉、ROE、毛利率、净利率、股息率、资产负债率等20+财务指标实时筛选，AI每日推荐最具潜力股票。">
@@ -152,67 +153,142 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: #0a0a0a;
-    color: #e0d5c1;
-    min-height: 100vh;
+  :root {
+    --bg-deep: #08080a;
+    --bg-base: #0e0e10;
+    --bg-surface: #141416;
+    --bg-elevated: #1a1a1e;
+    --bg-hover: #1e1e22;
+    --border-subtle: rgba(255,255,255,0.04);
+    --border-medium: rgba(255,255,255,0.07);
+    --border-accent: rgba(192,165,115,0.25);
+    --gold-dim: #7a6a48;
+    --gold-muted: #a08c60;
+    --gold-base: #bfa873;
+    --gold-bright: #d4bc82;
+    --gold-glow: rgba(191,168,115,0.08);
+    --text-primary: #d5d0c8;
+    --text-secondary: #918a7e;
+    --text-tertiary: #5c564c;
+    --red: #cf6060;
+    --red-bg: rgba(207,96,96,0.08);
+    --green: #5cb87a;
+    --green-bg: rgba(92,184,122,0.08);
   }
 
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Gold Particle Canvas ===== */
+  #goldCanvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+  body.light #goldCanvas { opacity: 0.35; }
+  .header, .marquee-bar, .container, footer { position: relative; z-index: 1; }
+
+  /* ===== Header ===== */
   .header {
-    background: linear-gradient(135deg, #0f0f0f, #1a1408);
-    border-bottom: 1px solid #2a2010;
-    color: #fff;
-    padding: 24px 32px;
+    background: rgba(14,14,16,0.05);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 22px 36px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
+    gap: 20px;
   }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .header-left { flex: 1; min-width: 0; }
   .header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #d4a843, #f5d485, #c9952a);
+    font-size: 20px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--gold-muted), var(--gold-bright), var(--gold-muted));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 2px;
   }
-  .header .sub { font-size: 13px; color: #8a7a5a; margin-top: 4px; letter-spacing: 1px; }
+  .header-taglines {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tagline {
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+  }
+  .tagline.dim { color: var(--text-tertiary); font-size: 10px; }
+  .tagline-sep { color: var(--text-tertiary); font-size: 10px; opacity: 0.4; }
+  .header-center { flex-shrink: 0; }
+  .brand-badge {
+    padding: 6px 20px;
+    border: 1px solid var(--border-accent);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--gold-base);
+    background: var(--gold-glow);
+    white-space: nowrap;
+  }
 
-  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  /* ===== Layout ===== */
+  .container { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
 
+  /* ===== Panels ===== */
   .panel {
-    background: linear-gradient(145deg, #131210, #1a1710);
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,168,67,0.08);
-    margin-bottom: 20px;
-    border: 1px solid #2a2010;
+    background: rgba(20,20,22,0.05);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
+    margin-bottom: 24px;
+    border: 1px solid var(--border-subtle);
+    position: relative;
   }
   .panel-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
-    margin-bottom: 20px;
-    color: #d4a843;
-    border-left: 3px solid #d4a843;
-    padding-left: 10px;
+    margin-bottom: 24px;
+    color: var(--gold-base);
+    border-left: 2px solid var(--gold-dim);
+    padding-left: 12px;
+    letter-spacing: 1px;
   }
 
+  /* ===== Section Titles ===== */
   .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #8a7a5a;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 20px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #1a1508;
+    letter-spacing: 3px;
+    margin: 28px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
   }
   .section-title:first-child { margin-top: 0; }
 
+  /* ===== Filters Grid ===== */
   .filters {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 12px;
+    gap: 10px;
   }
 
   .filter-item {
@@ -220,32 +296,56 @@
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    background: #111;
-    border-radius: 8px;
-    border: 1px solid #252015;
-    transition: all 0.2s;
+    background: rgba(14,14,16,0.05);
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    transition: all 0.25s ease;
   }
-  .filter-item:hover { border-color: #3a3020; background: #161410; }
+  .filter-item:hover {
+    border-color: var(--border-medium);
+    background: var(--bg-elevated);
+  }
   .filter-item.active {
-    border-color: #d4a843;
-    background: linear-gradient(145deg, #1a1508, #1e1a0e);
-    box-shadow: 0 0 12px rgba(212,168,67,0.08);
+    border-color: var(--border-accent);
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px var(--gold-glow), 0 0 20px rgba(191,168,115,0.03);
   }
 
   .filter-item input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
     width: 16px; height: 16px;
-    accent-color: #d4a843;
+    border: 1.5px solid var(--border-medium);
+    border-radius: 4px;
+    background: var(--bg-deep);
     cursor: pointer;
     flex-shrink: 0;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .filter-item input[type="checkbox"]:checked {
+    background: var(--gold-dim);
+    border-color: var(--gold-muted);
+  }
+  .filter-item input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4.5px; top: 1.5px;
+    width: 4px; height: 8px;
+    border: solid #fff; border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+    opacity: 0.9;
   }
 
   .filter-label {
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 400;
     min-width: 80px;
     flex-shrink: 0;
-    color: #c9b88a;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
   }
+  .filter-item.active .filter-label { color: var(--gold-base); }
 
   .filter-controls {
     display: flex;
@@ -259,302 +359,549 @@
   .filter-controls input[type="number"],
   .filter-controls input[type="text"] {
     padding: 5px 8px;
-    border: 1px solid #2a2010;
+    border: 1px solid var(--border-medium);
     border-radius: 6px;
     font-size: 12px;
-    background: #0e0e0c;
-    color: #e0d5c1;
+    background: var(--bg-deep);
+    color: var(--text-primary);
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s ease;
   }
   .filter-controls select:focus,
-  .filter-controls input:focus { border-color: #d4a843; box-shadow: 0 0 6px rgba(212,168,67,0.15); }
+  .filter-controls input:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 2px var(--gold-glow);
+  }
 
   .filter-controls input[type="number"] { width: 70px; }
   .filter-controls input[type="text"] { width: 120px; }
   .filter-controls select { min-width: 55px; }
 
-  .filter-sep { color: #5a4a30; font-size: 12px; }
-  .filter-unit { color: #5a4a30; font-size: 12px; }
+  .filter-sep { color: var(--text-tertiary); font-size: 12px; }
+  .filter-unit { color: var(--text-tertiary); font-size: 12px; }
 
+  /* ===== Custom Input ===== */
   .custom-row {
-    margin-top: 16px;
+    margin-top: 20px;
     display: flex;
     gap: 10px;
     align-items: center;
   }
   .custom-row input {
     flex: 1;
-    padding: 10px 14px;
-    border: 1px solid #2a2010;
-    border-radius: 8px;
+    padding: 11px 16px;
+    border: 1px solid var(--border-medium);
+    border-radius: 10px;
     font-size: 14px;
     outline: none;
-    background: #0e0e0c;
-    color: #e0d5c1;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
   }
-  .custom-row input::placeholder { color: #5a4a30; }
-  .custom-row input:focus { border-color: #d4a843; box-shadow: 0 0 6px rgba(212,168,67,0.15); }
+  .custom-row input::placeholder { color: var(--text-tertiary); }
+  .custom-row input:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 2px var(--gold-glow);
+  }
 
+  /* ===== Buttons ===== */
   .actions {
-    margin-top: 20px;
+    margin-top: 24px;
     display: flex;
     gap: 12px;
     align-items: center;
   }
   .btn {
-    padding: 10px 28px;
+    padding: 11px 32px;
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
   }
   .btn-primary {
-    background: linear-gradient(135deg, #c9952a, #d4a843, #e8c35a);
-    color: #0a0a0a;
+    background: linear-gradient(135deg, #9a8255, #b59a68, #a08c5c);
+    color: #fff;
     font-weight: 600;
-    box-shadow: 0 2px 12px rgba(212,168,67,0.25);
+    box-shadow: 0 2px 12px rgba(160,140,92,0.15);
   }
-  .btn-primary:hover { background: linear-gradient(135deg, #d4a843, #e8c35a, #f5d485); box-shadow: 0 4px 20px rgba(212,168,67,0.35); }
-  .btn-primary:disabled { background: #3a3020; color: #5a4a30; cursor: not-allowed; box-shadow: none; }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #b59a68, #c9ad78, #b59a68);
+    box-shadow: 0 4px 24px rgba(160,140,92,0.2);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    background: var(--bg-elevated);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
   .btn-secondary {
-    background: #1a1710;
-    color: #c9b88a;
-    border: 1px solid #2a2010;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-medium);
   }
-  .btn-secondary:hover { background: #252015; border-color: #3a3020; }
+  .btn-secondary:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-accent);
+    color: var(--gold-base);
+  }
 
+  /* ===== Query Preview ===== */
   .query-preview {
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: #0e0e0c;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #5a4a30;
-    font-family: monospace;
+    margin-top: 14px;
+    padding: 11px 16px;
+    background: var(--bg-deep);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-family: "SF Mono", "Fira Code", monospace;
     word-break: break-all;
-    border: 1px solid #1a1508;
+    border: 1px solid var(--border-subtle);
+    line-height: 1.5;
   }
 
+  /* ===== Results ===== */
   .result-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
-  .result-count { font-size: 14px; color: #8a7a5a; }
-  .result-count strong { color: #d4a843; font-size: 18px; }
+  .result-count { font-size: 14px; color: var(--text-secondary); }
+  .result-count strong { color: var(--gold-bright); font-size: 18px; font-weight: 600; }
 
+  /* ===== Table ===== */
   .table-wrap {
     overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid #2a2010;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
     max-height: 70vh;
     overflow-y: auto;
   }
   table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
   thead th {
-    background: #161410;
-    padding: 10px 14px;
+    background: var(--bg-elevated);
+    padding: 11px 16px;
     text-align: left;
-    font-weight: 600;
-    color: #d4a843;
-    border-bottom: 2px solid #2a2010;
+    font-weight: 500;
+    color: var(--gold-muted);
+    border-bottom: 1px solid var(--border-medium);
     position: sticky;
     top: 0;
     z-index: 1;
     cursor: pointer;
     user-select: none;
     transition: background 0.2s;
+    font-size: 12px;
+    letter-spacing: 0.3px;
   }
-  thead th:hover { background: #1e1a10; }
-  thead th .sort-arrow { font-size: 11px; margin-left: 4px; color: #5a4a30; }
-  thead th.sort-asc .sort-arrow, thead th.sort-desc .sort-arrow { color: #d4a843; }
-  tbody td { padding: 9px 14px; border-bottom: 1px solid #1a1508; color: #c9b88a; }
-  tbody td.col-name { color: #e0d5c1; font-weight: 600; }
-  tbody td.col-code { color: #8a7a5a; font-family: monospace; font-size: 12px; }
-  tbody td.num-up { color: #e65a5a; font-weight: 500; }
-  tbody td.num-down { color: #4ecb71; font-weight: 500; }
-  tbody td.num-gold { color: #d4a843; }
-  tbody td .bar-wrap {
-    display: flex; align-items: center; gap: 6px;
+  thead th:hover { background: var(--bg-hover); }
+  thead th .sort-arrow { font-size: 10px; margin-left: 4px; color: var(--text-tertiary); opacity: 0.5; }
+  thead th.sort-asc .sort-arrow,
+  thead th.sort-desc .sort-arrow { color: var(--gold-base); opacity: 1; }
+  tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 13px;
   }
-  tbody td .bar {
-    height: 6px; border-radius: 3px; min-width: 2px; max-width: 80px;
-  }
-  tbody td .bar.bar-red { background: linear-gradient(90deg, #e65a5a, #e65a5a88); }
-  tbody td .bar.bar-green { background: linear-gradient(90deg, #4ecb71, #4ecb7188); }
-  tbody td .bar.bar-gold { background: linear-gradient(90deg, #d4a843, #d4a84388); }
+  tbody td.col-name { color: var(--text-primary); font-weight: 500; }
+  tbody td.col-code { color: var(--text-tertiary); font-family: "SF Mono", monospace; font-size: 12px; }
+  tbody td.num-up { color: var(--red); font-weight: 500; }
+  tbody td.num-down { color: var(--green); font-weight: 500; }
+  tbody td.num-gold { color: var(--gold-base); }
+  tbody td .bar-wrap { display: flex; align-items: center; gap: 6px; }
+  tbody td .bar { height: 5px; border-radius: 3px; min-width: 2px; max-width: 80px; }
+  tbody td .bar.bar-red { background: linear-gradient(90deg, var(--red), transparent); }
+  tbody td .bar.bar-green { background: linear-gradient(90deg, var(--green), transparent); }
+  tbody td .bar.bar-gold { background: linear-gradient(90deg, var(--gold-base), transparent); }
   tbody td .tag {
-    display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
   }
-  tbody td .tag-up { background: rgba(230,90,90,0.12); color: #e65a5a; }
-  tbody td .tag-down { background: rgba(78,203,113,0.12); color: #4ecb71; }
-  tbody tr:hover { background: #1a1710; }
-  tbody tr:nth-child(even) { background: #0f0e0c; }
-  tbody tr:nth-child(even):hover { background: #1a1710; }
-  tbody tr { transition: background 0.15s; }
+  tbody td .tag-up { background: var(--red-bg); color: var(--red); }
+  tbody td .tag-down { background: var(--green-bg); color: var(--green); }
+  tbody tr { transition: background 0.15s ease; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.01); }
+  tbody tr:nth-child(even):hover { background: rgba(255,255,255,0.02); }
 
-  .loading { display: none; text-align: center; padding: 60px 20px; color: #8a7a5a; }
+  /* ===== Loading & States ===== */
+  .loading { display: none; text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
   .loading.show { display: block; }
   .spinner {
-    width: 36px; height: 36px;
-    border: 3px solid #2a2010;
-    border-top-color: #d4a843;
+    width: 32px; height: 32px;
+    border: 2px solid var(--border-medium);
+    border-top-color: var(--gold-muted);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 1s linear infinite;
     margin: 0 auto 16px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .empty { text-align: center; padding: 60px 20px; color: #5a4a30; font-size: 15px; }
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-tertiary); font-size: 14px; }
 
   .error-msg {
     padding: 14px 18px;
-    background: #1a0f0f;
-    color: #e65a5a;
-    border-radius: 8px;
-    border: 1px solid #3a1515;
-    font-size: 14px;
+    background: rgba(207,96,96,0.06);
+    color: var(--red);
+    border-radius: 10px;
+    border: 1px solid rgba(207,96,96,0.12);
+    font-size: 13px;
   }
 
   .export-btn { padding: 6px 16px; font-size: 13px; }
 
-  /* AI推荐板块 */
-  .ai-section { margin-bottom: 20px; }
+  /* ===== AI Section ===== */
+  .ai-section { margin-bottom: 24px; }
   .ai-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   .ai-header .panel-title { margin-bottom: 0; }
   .ai-refresh {
-    padding: 6px 18px;
-    border: 1px solid #2a2010;
-    border-radius: 6px;
-    background: #1a1710;
-    color: #d4a843;
-    font-size: 13px;
+    padding: 7px 20px;
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    color: var(--gold-muted);
+    font-size: 12px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
   }
-  .ai-refresh:hover { background: #252015; border-color: #d4a843; }
-  .ai-refresh:disabled { color: #5a4a30; cursor: not-allowed; }
+  .ai-refresh:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-accent);
+    color: var(--gold-base);
+  }
+  .ai-refresh:disabled { color: var(--text-tertiary); cursor: not-allowed; }
 
   .ai-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    gap: 14px;
   }
   @media (max-width: 1200px) { .ai-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 768px) { .ai-grid { grid-template-columns: repeat(2, 1fr); } }
 
   .ai-card {
-    background: linear-gradient(145deg, #161410, #1a1710);
-    border: 1px solid #252015;
-    border-radius: 10px;
-    padding: 16px;
-    transition: all 0.3s;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 18px;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
   }
+  .ai-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
   .ai-card:hover {
-    border-color: #d4a843;
-    box-shadow: 0 0 20px rgba(212,168,67,0.12);
+    border-color: var(--border-accent);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     transform: translateY(-2px);
   }
+  .ai-card:hover::before { opacity: 1; }
   .ai-card .rank {
     position: absolute;
-    top: 8px;
-    right: 10px;
-    font-size: 11px;
-    color: #5a4a30;
-    font-weight: 700;
+    top: 10px;
+    right: 12px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
   }
   .ai-card .stock-name {
     font-size: 15px;
-    font-weight: 600;
-    color: #e0d5c1;
-    margin-bottom: 2px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 3px;
   }
   .ai-card .stock-code {
     font-size: 11px;
-    color: #5a4a30;
-    margin-bottom: 10px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    font-family: "SF Mono", monospace;
   }
   .ai-card .stock-price {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 2px;
+    font-variant-numeric: tabular-nums;
   }
-  .ai-card .stock-price.up { color: #e65a5a; }
-  .ai-card .stock-price.down { color: #4ecb71; }
+  .ai-card .stock-price.up { color: var(--red); }
+  .ai-card .stock-price.down { color: var(--green); }
   .ai-card .stock-change {
     font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    font-variant-numeric: tabular-nums;
   }
-  .ai-card .stock-change.up { color: #e65a5a; }
-  .ai-card .stock-change.down { color: #4ecb71; }
+  .ai-card .stock-change.up { color: var(--red); }
+  .ai-card .stock-change.down { color: var(--green); }
   .ai-card .stock-reason {
     font-size: 12px;
-    color: #8a7a5a;
-    line-height: 1.4;
-    margin-bottom: 8px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    opacity: 0.8;
   }
   .ai-card .stock-signal {
     display: inline-block;
-    padding: 2px 10px;
-    border-radius: 4px;
+    padding: 3px 12px;
+    border-radius: 6px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: 0.3px;
   }
-  .ai-card .stock-signal.bullish { background: rgba(230,90,90,0.15); color: #e65a5a; }
-  .ai-card .stock-signal.neutral { background: rgba(212,168,67,0.15); color: #d4a843; }
-  .ai-card .stock-signal.cautious { background: rgba(78,203,113,0.15); color: #4ecb71; }
+  .ai-card .stock-signal.bullish { background: var(--red-bg); color: var(--red); }
+  .ai-card .stock-signal.neutral { background: var(--gold-glow); color: var(--gold-muted); }
+  .ai-card .stock-signal.cautious { background: var(--green-bg); color: var(--green); }
 
   .ai-loading {
     text-align: center;
-    padding: 40px;
-    color: #5a4a30;
+    padding: 48px;
+    color: var(--text-tertiary);
+    font-size: 13px;
   }
   .ai-loading .spinner {
-    width: 28px; height: 28px;
+    width: 24px; height: 24px;
     border-width: 2px;
-    margin: 0 auto 12px;
+    margin: 0 auto 14px;
   }
   .ai-error {
     text-align: center;
     padding: 30px;
-    color: #e65a5a;
+    color: var(--red);
     font-size: 13px;
   }
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0a0a0a; }
-  ::-webkit-scrollbar-thumb { background: #2a2010; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3a3020; }
+  /* ===== Header Actions ===== */
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .toggle-btn {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border-medium);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+  }
+  .toggle-btn:hover {
+    border-color: var(--border-accent);
+    color: var(--gold-base);
+    background: var(--bg-hover);
+  }
+  #langToggle { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; }
+
+  /* ===== Light Theme ===== */
+  body.light {
+    --bg-deep: #f5f4f1;
+    --bg-base: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-elevated: #f0eeea;
+    --bg-hover: #e8e5df;
+    --border-subtle: rgba(0,0,0,0.06);
+    --border-medium: rgba(0,0,0,0.10);
+    --border-accent: rgba(160,130,70,0.30);
+    --gold-dim: #9a8255;
+    --gold-muted: #8a7245;
+    --gold-base: #7a6435;
+    --gold-bright: #6a5528;
+    --gold-glow: rgba(140,115,60,0.08);
+    --text-primary: #1a1a1a;
+    --text-secondary: #5c5650;
+    --text-tertiary: #9a948a;
+    --red: #c04040;
+    --red-bg: rgba(192,64,64,0.06);
+    --green: #2a8a4a;
+    --green-bg: rgba(42,138,74,0.06);
+  }
+  body.light .header {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  body.light .header::after {
+    background: linear-gradient(90deg, transparent, rgba(140,115,60,0.25), transparent);
+  }
+  body.light .panel {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+  }
+  body.light .header {
+    background: rgba(250,247,240,0.88);
+  }
+  body.light .btn-primary {
+    background: linear-gradient(135deg, #7a6435, #8a7245, #7a6435);
+    color: #fff;
+  }
+  body.light .btn-primary:hover {
+    background: linear-gradient(135deg, #8a7245, #9a8255, #8a7245);
+  }
+  body.light .filter-item input[type="checkbox"]:checked {
+    background: var(--gold-dim);
+    border-color: var(--gold-muted);
+  }
+  body.light thead th { background: var(--bg-elevated); }
+  body.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+  body.light ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+  /* ===== Marquee Cards ===== */
+  .marquee-bar {
+    width: 100%; overflow: hidden;
+    background: rgba(12,12,14,0.05);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border-top: 1px solid var(--border-dim);
+    border-bottom: 1px solid var(--border-dim);
+    padding: 10px 0;
+    position: relative;
+  }
+  .marquee-track {
+    display: flex; gap: 14px;
+    animation: marqueeScroll 80s linear infinite;
+  }
+  .marquee-track:hover { animation-play-state: paused; }
+  .marquee-card {
+    flex-shrink: 0;
+    width: 260px;
+    padding: 10px 16px;
+    background: rgba(20,20,22,0.05);
+    border: 1px solid var(--border-accent);
+    border-radius: 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    white-space: normal;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .marquee-card .card-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: var(--gold-glow);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-base);
+    font-size: 11px; font-weight: 700;
+  }
+  .marquee-card .card-text { color: var(--text-primary); }
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  body.light .marquee-bar {
+    background: rgba(245,240,232,0.7);
+  }
+  body.light .marquee-card {
+    background: rgba(255,255,255,0.6);
+    border-color: rgba(140,115,60,0.2);
+  }
 </style>
 </head>
 <body>
+<canvas id="goldCanvas"></canvas>
 
 <div class="header">
-  <div>
-    <h1>超级无敌筛选赚钱大神器</h1>
-    <div class="sub">CC匠心之作</div>
+  <div class="header-left">
+    <h1><svg class="title-icon" viewBox="0 0 28 28" width="28" height="28" style="vertical-align:-2px;margin-right:6px;"><polyline points="2,22 9,14 14,18 20,8 26,3" fill="none" stroke="var(--gold-base)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><polygon points="23,2 27,2 27,6" fill="var(--gold-base)"/></svg><span data-i18n="title">A股智能选股器</span></h1>
+    <div class="header-taglines">
+      <span class="tagline" data-i18n="tagline1">下一个巴菲特就是你</span>
+      <span class="tagline-sep">|</span>
+      <span class="tagline dim" data-i18n="tagline2">股市有风险，本页面的股票推荐系统不构成投资建议</span>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="brand-badge" data-i18n="subtitle">CC匠心之作</div>
+  </div>
+  <div class="header-actions">
+    <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()" title="切换日间/夜间模式">
+      <span id="themeIcon">&#9788;</span>
+    </button>
+    <button class="toggle-btn" id="langToggle" onclick="toggleLang()">
+      <span id="langLabel">EN</span>
+    </button>
   </div>
 </div>
+
+<div class="marquee-bar">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+<script>
+(function(){
+  const quotes = [
+    "涨时重势，跌时重质",
+    "侥幸是加大风险的罪魁，犹豫是错失良机的祸首",
+    "绝不要平摊亏损，一定要牢牢记住这个原则",
+    "耐心是致胜的关键，信心是成功的保障",
+    "买卖都不顺手时，应立即退出来",
+    "适可而止，见好就收；一旦有变，落袋为安",
+    "买股时勿冲动，卖股时要果断",
+    "常赚比大赚更重要",
+    "该跌的不跌，理应看涨；该涨的不涨，坚决看跌",
+    "均线变动的角度反映了股价变动的速度",
+    "市道不妙时，三十六计走为上策",
+    "操盘手最重要的是盘中的应变能力",
+    "多头时做多，空头时做空",
+    "知道如何等待，才是股市成功的秘诀",
+    "看得懂的时候就进场，看不懂的时候就观望",
+    "当你买进的理由消失时，就是很好的出场时机",
+    "股票不必天天买，功课却要天天做",
+    "起跌之时强势股不要买，末跌之时弱势股不要卖",
+    "不见长红不回头，不见长黑不止跌",
+    "涨幅过大的股票坚决卖出，锁定利润最重要",
+    "坚决不买绩差股",
+    "买入靠信心，持有靠耐心，卖出靠决心",
+    "时刻留意可能出现的危险信号",
+    "平常时间最好静坐，愈少买卖愈好"
+  ];
+  const track = document.getElementById('marqueeTrack');
+  // 生成两份实现无缝循环
+  const html = quotes.map((q,i) =>
+    '<div class="marquee-card"><span class="card-num">'+(i+1)+'</span><span class="card-text">'+q+'</span></div>'
+  ).join('');
+  track.innerHTML = html + html;
+})();
+</script>
 
 <div class="container">
   <!-- AI 每日推荐 -->
   <div class="panel ai-section">
     <div class="ai-header">
-      <div class="panel-title">CC今日推荐</div>
-      <div style="font-size:12px;color:#5a4a30;margin-left:12px;flex:1;">注：不要信、不一定准、亏钱不要找我、和我没关系</div>
-      <button class="ai-refresh" id="aiRefreshBtn" onclick="loadAIRecommend()">刷新推荐</button>
+      <div class="panel-title" data-i18n="ai_title">CC今日推荐</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-left:12px;flex:1;letter-spacing:0.3px;" data-i18n="ai_disclaimer">注：不要信、不一定准、亏钱不要找我、和我没关系</div>
+      <button class="ai-refresh" id="aiRefreshBtn" onclick="loadAIRecommend()" data-i18n="ai_refresh">刷新推荐</button>
     </div>
     <div id="aiContent">
       <div class="ai-loading">
@@ -565,15 +912,15 @@
   </div>
 
   <div class="panel">
-    <div class="panel-title">筛选条件</div>
+    <div class="panel-title" data-i18n="filter_title">筛选条件</div>
 
     <!-- ===== 盈利能力 ===== -->
-    <div class="section-title">盈利能力</div>
+    <div class="section-title" data-i18n="sec_profit">盈利能力</div>
     <div class="filters">
 
       <div class="filter-item active" id="fi-revenue">
         <input type="checkbox" id="revenue_enabled" checked onchange="toggleFilter(this,'fi-revenue')">
-        <span class="filter-label">营业总收入</span>
+        <span class="filter-label" data-i18n="f_revenue">营业总收入</span>
         <div class="filter-controls">
           <select id="revenue_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="revenue_val" value="50" min="0">
@@ -583,8 +930,15 @@
 
       <div class="filter-item" id="fi-revenue-growth">
         <input type="checkbox" id="revenue_growth_enabled" onchange="toggleFilter(this,'fi-revenue-growth')">
-        <span class="filter-label">营收增长率</span>
+        <span class="filter-label" data-i18n="f_rev_growth">营收增长率</span>
         <div class="filter-controls">
+          <select id="revenue_growth_period">
+            <option value="">最新年报</option>
+            <option value="单季">最新季报</option>
+            <option value="连续2年">连续2年</option>
+            <option value="连续3年">连续3年</option>
+            <option value="连续5年">连续5年</option>
+          </select>
           <select id="revenue_growth_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="revenue_growth_val" value="10" step="1">
           <span class="filter-unit">%</span>
@@ -593,7 +947,7 @@
 
       <div class="filter-item active" id="fi-profit">
         <input type="checkbox" id="profit_enabled" checked onchange="toggleFilter(this,'fi-profit')">
-        <span class="filter-label">扣非净利润</span>
+        <span class="filter-label" data-i18n="f_profit">扣非净利润</span>
         <div class="filter-controls">
           <select id="profit_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="profit_val" value="5" min="0">
@@ -603,8 +957,15 @@
 
       <div class="filter-item" id="fi-profit-growth">
         <input type="checkbox" id="profit_growth_enabled" onchange="toggleFilter(this,'fi-profit-growth')">
-        <span class="filter-label">扣非净利增长</span>
+        <span class="filter-label" data-i18n="f_profit_growth">扣非净利增长</span>
         <div class="filter-controls">
+          <select id="profit_growth_period">
+            <option value="">最新年报</option>
+            <option value="单季">最新季报</option>
+            <option value="连续2年">连续2年</option>
+            <option value="连续3年">连续3年</option>
+            <option value="连续5年">连续5年</option>
+          </select>
           <select id="profit_growth_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="profit_growth_val" value="10" step="1">
           <span class="filter-unit">%</span>
@@ -613,7 +974,7 @@
 
       <div class="filter-item" id="fi-gross-margin">
         <input type="checkbox" id="gross_margin_enabled" onchange="toggleFilter(this,'fi-gross-margin')">
-        <span class="filter-label">毛利率</span>
+        <span class="filter-label" data-i18n="f_gross_margin">毛利率</span>
         <div class="filter-controls">
           <input type="number" id="gross_margin_min" value="30" step="1">
           <span class="filter-sep">~</span>
@@ -624,7 +985,7 @@
 
       <div class="filter-item" id="fi-net-margin">
         <input type="checkbox" id="net_margin_enabled" onchange="toggleFilter(this,'fi-net-margin')">
-        <span class="filter-label">净利率</span>
+        <span class="filter-label" data-i18n="f_net_margin">净利率</span>
         <div class="filter-controls">
           <input type="number" id="net_margin_min" value="10" step="1">
           <span class="filter-sep">~</span>
@@ -635,7 +996,7 @@
 
       <div class="filter-item" id="fi-roe">
         <input type="checkbox" id="roe_enabled" onchange="toggleFilter(this,'fi-roe')">
-        <span class="filter-label">ROE</span>
+        <span class="filter-label" data-i18n="f_roe">ROE</span>
         <div class="filter-controls">
           <input type="number" id="roe_min" value="10" step="1">
           <span class="filter-sep">~</span>
@@ -646,7 +1007,7 @@
 
       <div class="filter-item" id="fi-eps">
         <input type="checkbox" id="eps_enabled" onchange="toggleFilter(this,'fi-eps')">
-        <span class="filter-label">每股收益</span>
+        <span class="filter-label" data-i18n="f_eps">每股收益</span>
         <div class="filter-controls">
           <select id="eps_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="eps_val" value="1" step="0.1">
@@ -657,12 +1018,12 @@
     </div>
 
     <!-- ===== 现金流 ===== -->
-    <div class="section-title">现金流</div>
+    <div class="section-title" data-i18n="sec_cashflow">现金流</div>
     <div class="filters">
 
       <div class="filter-item active" id="fi-cashflow">
         <input type="checkbox" id="cashflow_enabled" checked onchange="toggleFilter(this,'fi-cashflow')">
-        <span class="filter-label">经营现金流</span>
+        <span class="filter-label" data-i18n="f_cashflow">经营现金流</span>
         <div class="filter-controls">
           <select id="cashflow_type">
             <option value="为正">为正</option>
@@ -673,15 +1034,34 @@
         </div>
       </div>
 
+      <div class="filter-item" id="fi-cashflow-consecutive">
+        <input type="checkbox" id="cashflow_consecutive_enabled" onchange="toggleFilter(this,'fi-cashflow-consecutive')">
+        <span class="filter-label" data-i18n="f_cashflow_consecutive">连续经营现金流</span>
+        <div class="filter-controls">
+          <span data-i18n="f_cashflow_consecutive_prefix">连续</span>
+          <select id="cashflow_consecutive_years">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="7">7</option>
+            <option value="10">10</option>
+          </select>
+          <span data-i18n="f_cashflow_consecutive_mid">年</span>
+          <select id="cashflow_consecutive_type">
+            <option value="为正">为正</option>
+            <option value="为负">为负</option>
+          </select>
+        </div>
+      </div>
+
     </div>
 
     <!-- ===== 估值指标 ===== -->
-    <div class="section-title">估值指标</div>
+    <div class="section-title" data-i18n="sec_valuation">估值指标</div>
     <div class="filters">
 
       <div class="filter-item active" id="fi-pe">
         <input type="checkbox" id="pe_enabled" checked onchange="toggleFilter(this,'fi-pe')">
-        <span class="filter-label">市盈率 (PE)</span>
+        <span class="filter-label" data-i18n="f_pe">市盈率 (PE)</span>
         <div class="filter-controls">
           <input type="number" id="pe_min" value="0" min="0" step="1">
           <span class="filter-sep">~</span>
@@ -691,7 +1071,7 @@
 
       <div class="filter-item active" id="fi-pb">
         <input type="checkbox" id="pb_enabled" checked onchange="toggleFilter(this,'fi-pb')">
-        <span class="filter-label">市净率 (PB)</span>
+        <span class="filter-label" data-i18n="f_pb">市净率 (PB)</span>
         <div class="filter-controls">
           <input type="number" id="pb_min" value="0" min="0" step="0.1">
           <span class="filter-sep">~</span>
@@ -701,7 +1081,7 @@
 
       <div class="filter-item" id="fi-ps">
         <input type="checkbox" id="ps_enabled" onchange="toggleFilter(this,'fi-ps')">
-        <span class="filter-label">市销率 (PS)</span>
+        <span class="filter-label" data-i18n="f_ps">市销率 (PS)</span>
         <div class="filter-controls">
           <input type="number" id="ps_min" value="0" min="0" step="0.1">
           <span class="filter-sep">~</span>
@@ -711,17 +1091,18 @@
 
       <div class="filter-item" id="fi-dividend">
         <input type="checkbox" id="dividend_enabled" onchange="toggleFilter(this,'fi-dividend')">
-        <span class="filter-label">股息率</span>
+        <span class="filter-label" data-i18n="f_dividend">股息率</span>
         <div class="filter-controls">
-          <select id="dividend_op"><option value="大于">></option><option value="小于"><</option></select>
-          <input type="number" id="dividend_val" value="3" step="0.5">
+          <input type="number" id="dividend_min" value="3" min="0" max="100" step="0.5">
+          <span class="filter-sep">~</span>
+          <input type="number" id="dividend_max" value="100" min="0" max="100" step="0.5">
           <span class="filter-unit">%</span>
         </div>
       </div>
 
       <div class="filter-item" id="fi-mcap">
         <input type="checkbox" id="mcap_enabled" onchange="toggleFilter(this,'fi-mcap')">
-        <span class="filter-label">总市值</span>
+        <span class="filter-label" data-i18n="f_mcap">总市值</span>
         <div class="filter-controls">
           <input type="number" id="mcap_min" value="100" min="0">
           <span class="filter-sep">~</span>
@@ -733,22 +1114,27 @@
     </div>
 
     <!-- ===== 财务健康 ===== -->
-    <div class="section-title">财务健康</div>
+    <div class="section-title" data-i18n="sec_health">财务健康</div>
     <div class="filters">
 
       <div class="filter-item active" id="fi-goodwill">
         <input type="checkbox" id="goodwill_enabled" checked onchange="toggleFilter(this,'fi-goodwill')">
-        <span class="filter-label">商誉</span>
+        <span class="filter-label" data-i18n="f_goodwill">商誉</span>
         <div class="filter-controls">
+          <select id="goodwill_mode" onchange="toggleGoodwillMode()">
+            <option value="abs">绝对值</option>
+            <option value="pct">占总市值%</option>
+          </select>
           <select id="goodwill_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="goodwill_val" value="10" min="0">
           <select id="goodwill_unit"><option value="亿">亿</option><option value="万">万</option></select>
+          <span class="filter-unit" id="goodwill_pct_unit" style="display:none">%</span>
         </div>
       </div>
 
       <div class="filter-item" id="fi-debt-ratio">
         <input type="checkbox" id="debt_ratio_enabled" onchange="toggleFilter(this,'fi-debt-ratio')">
-        <span class="filter-label">资产负债率</span>
+        <span class="filter-label" data-i18n="f_debt_ratio">资产负债率</span>
         <div class="filter-controls">
           <input type="number" id="debt_ratio_min" value="0" min="0" step="5">
           <span class="filter-sep">~</span>
@@ -759,7 +1145,7 @@
 
       <div class="filter-item" id="fi-current-ratio">
         <input type="checkbox" id="current_ratio_enabled" onchange="toggleFilter(this,'fi-current-ratio')">
-        <span class="filter-label">流动比率</span>
+        <span class="filter-label" data-i18n="f_current_ratio">流动比率</span>
         <div class="filter-controls">
           <select id="current_ratio_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="current_ratio_val" value="1.5" step="0.1">
@@ -769,12 +1155,12 @@
     </div>
 
     <!-- ===== 市场表现 ===== -->
-    <div class="section-title">市场表现</div>
+    <div class="section-title" data-i18n="sec_market">市场表现</div>
     <div class="filters">
 
       <div class="filter-item" id="fi-industry">
         <input type="checkbox" id="industry_enabled" onchange="toggleFilter(this,'fi-industry')">
-        <span class="filter-label">所属行业</span>
+        <span class="filter-label" data-i18n="f_industry">所属行业</span>
         <div class="filter-controls">
           <input type="text" id="industry_val" placeholder="如：半导体、白酒" style="width:160px;">
         </div>
@@ -782,7 +1168,7 @@
 
       <div class="filter-item" id="fi-listing-years">
         <input type="checkbox" id="listing_years_enabled" onchange="toggleFilter(this,'fi-listing-years')">
-        <span class="filter-label">上市年限</span>
+        <span class="filter-label" data-i18n="f_listing_years">上市年限</span>
         <div class="filter-controls">
           <select id="listing_years_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="listing_years_val" value="3" min="0" step="1">
@@ -792,7 +1178,7 @@
 
       <div class="filter-item" id="fi-pct-change">
         <input type="checkbox" id="pct_change_enabled" onchange="toggleFilter(this,'fi-pct-change')">
-        <span class="filter-label">区间涨跌幅</span>
+        <span class="filter-label" data-i18n="f_pct_change">区间涨跌幅</span>
         <div class="filter-controls">
           <select id="pct_change_period">
             <option value="近一周">近一周</option>
@@ -809,8 +1195,13 @@
 
       <div class="filter-item" id="fi-turnover">
         <input type="checkbox" id="turnover_enabled" onchange="toggleFilter(this,'fi-turnover')">
-        <span class="filter-label">换手率</span>
+        <span class="filter-label" data-i18n="f_turnover">换手率</span>
         <div class="filter-controls">
+          <select id="turnover_period">
+            <option value="今日">今日</option>
+            <option value="5日">5日</option>
+            <option value="20日">20日</option>
+          </select>
           <select id="turnover_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="turnover_val" value="1" step="0.5">
           <span class="filter-unit">%</span>
@@ -820,12 +1211,12 @@
     </div>
 
     <!-- ===== 成长质量 ===== -->
-    <div class="section-title">成长质量</div>
+    <div class="section-title" data-i18n="sec_growth">成长质量</div>
     <div class="filters">
 
       <div class="filter-item" id="fi-net-profit">
         <input type="checkbox" id="net_profit_enabled" onchange="toggleFilter(this,'fi-net-profit')">
-        <span class="filter-label">归母净利润</span>
+        <span class="filter-label" data-i18n="f_net_profit">归母净利润</span>
         <div class="filter-controls">
           <select id="net_profit_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="net_profit_val" value="5" min="0">
@@ -835,7 +1226,7 @@
 
       <div class="filter-item" id="fi-net-profit-growth">
         <input type="checkbox" id="net_profit_growth_enabled" onchange="toggleFilter(this,'fi-net-profit-growth')">
-        <span class="filter-label">归母净利增长</span>
+        <span class="filter-label" data-i18n="f_np_growth">归母净利增长</span>
         <div class="filter-controls">
           <select id="net_profit_growth_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="net_profit_growth_val" value="10" step="1">
@@ -845,7 +1236,7 @@
 
       <div class="filter-item" id="fi-cont-growth">
         <input type="checkbox" id="cont_growth_enabled" onchange="toggleFilter(this,'fi-cont-growth')">
-        <span class="filter-label">连续增长</span>
+        <span class="filter-label" data-i18n="f_cont_growth">连续增长</span>
         <div class="filter-controls">
           <span class="filter-sep">连续</span>
           <select id="cont_growth_val">
@@ -858,7 +1249,7 @@
 
       <div class="filter-item" id="fi-roa">
         <input type="checkbox" id="roa_enabled" onchange="toggleFilter(this,'fi-roa')">
-        <span class="filter-label">ROA</span>
+        <span class="filter-label" data-i18n="f_roa">ROA</span>
         <div class="filter-controls">
           <input type="number" id="roa_min" value="5" step="1">
           <span class="filter-sep">~</span>
@@ -869,7 +1260,7 @@
 
       <div class="filter-item" id="fi-rd-ratio">
         <input type="checkbox" id="rd_ratio_enabled" onchange="toggleFilter(this,'fi-rd-ratio')">
-        <span class="filter-label">研发费用率</span>
+        <span class="filter-label" data-i18n="f_rd_ratio">研发费用率</span>
         <div class="filter-controls">
           <select id="rd_ratio_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="rd_ratio_val" value="5" step="1">
@@ -880,12 +1271,12 @@
     </div>
 
     <!-- ===== 估值进阶 ===== -->
-    <div class="section-title">估值进阶</div>
+    <div class="section-title" data-i18n="sec_val_adv">估值进阶</div>
     <div class="filters">
 
       <div class="filter-item" id="fi-peg">
         <input type="checkbox" id="peg_enabled" onchange="toggleFilter(this,'fi-peg')">
-        <span class="filter-label">PEG</span>
+        <span class="filter-label" data-i18n="f_peg">PEG</span>
         <div class="filter-controls">
           <input type="number" id="peg_min" value="0" step="0.1">
           <span class="filter-sep">~</span>
@@ -895,7 +1286,7 @@
 
       <div class="filter-item" id="fi-pcf">
         <input type="checkbox" id="pcf_enabled" onchange="toggleFilter(this,'fi-pcf')">
-        <span class="filter-label">市现率 (PCF)</span>
+        <span class="filter-label" data-i18n="f_pcf">市现率 (PCF)</span>
         <div class="filter-controls">
           <input type="number" id="pcf_min" value="0" step="1">
           <span class="filter-sep">~</span>
@@ -905,7 +1296,7 @@
 
       <div class="filter-item" id="fi-float-mcap">
         <input type="checkbox" id="float_mcap_enabled" onchange="toggleFilter(this,'fi-float-mcap')">
-        <span class="filter-label">流通市值</span>
+        <span class="filter-label" data-i18n="f_float_mcap">流通市值</span>
         <div class="filter-controls">
           <input type="number" id="float_mcap_min" value="50" min="0">
           <span class="filter-sep">~</span>
@@ -917,12 +1308,12 @@
     </div>
 
     <!-- ===== 资金与筹码 ===== -->
-    <div class="section-title">资金与筹码</div>
+    <div class="section-title" data-i18n="sec_capital">资金与筹码</div>
     <div class="filters">
 
       <div class="filter-item" id="fi-holders-change">
         <input type="checkbox" id="holders_change_enabled" onchange="toggleFilter(this,'fi-holders-change')">
-        <span class="filter-label">股东人数</span>
+        <span class="filter-label" data-i18n="f_holders">股东人数</span>
         <div class="filter-controls">
           <span class="filter-sep">最新一期</span>
           <select id="holders_change_type">
@@ -934,7 +1325,7 @@
 
       <div class="filter-item" id="fi-north-fund">
         <input type="checkbox" id="north_fund_enabled" onchange="toggleFilter(this,'fi-north-fund')">
-        <span class="filter-label">北向持股</span>
+        <span class="filter-label" data-i18n="f_north_fund">北向持股</span>
         <div class="filter-controls">
           <select id="north_fund_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="north_fund_val" value="0" step="0.5">
@@ -944,7 +1335,7 @@
 
       <div class="filter-item" id="fi-fund-hold">
         <input type="checkbox" id="fund_hold_enabled" onchange="toggleFilter(this,'fi-fund-hold')">
-        <span class="filter-label">基金持仓</span>
+        <span class="filter-label" data-i18n="f_fund_hold">基金持仓</span>
         <div class="filter-controls">
           <select id="fund_hold_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="fund_hold_val" value="5" step="1">
@@ -954,7 +1345,7 @@
 
       <div class="filter-item" id="fi-main-fund">
         <input type="checkbox" id="main_fund_enabled" onchange="toggleFilter(this,'fi-main-fund')">
-        <span class="filter-label">今日主力</span>
+        <span class="filter-label" data-i18n="f_main_fund">今日主力</span>
         <div class="filter-controls">
           <select id="main_fund_type">
             <option value="净流入">净流入</option>
@@ -965,7 +1356,7 @@
 
       <div class="filter-item" id="fi-volume-ratio">
         <input type="checkbox" id="volume_ratio_enabled" onchange="toggleFilter(this,'fi-volume-ratio')">
-        <span class="filter-label">量比</span>
+        <span class="filter-label" data-i18n="f_vol_ratio">量比</span>
         <div class="filter-controls">
           <select id="volume_ratio_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="volume_ratio_val" value="1.5" step="0.1">
@@ -975,12 +1366,12 @@
     </div>
 
     <!-- ===== 风险筛选 ===== -->
-    <div class="section-title">风险筛选</div>
+    <div class="section-title" data-i18n="sec_risk">风险筛选</div>
     <div class="filters">
 
       <div class="filter-item" id="fi-pledge">
         <input type="checkbox" id="pledge_enabled" onchange="toggleFilter(this,'fi-pledge')">
-        <span class="filter-label">质押比例</span>
+        <span class="filter-label" data-i18n="f_pledge">质押比例</span>
         <div class="filter-controls">
           <select id="pledge_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="pledge_val" value="30" step="5">
@@ -990,7 +1381,7 @@
 
       <div class="filter-item" id="fi-board">
         <input type="checkbox" id="board_enabled" onchange="toggleFilter(this,'fi-board')">
-        <span class="filter-label">上市板块</span>
+        <span class="filter-label" data-i18n="f_board">上市板块</span>
         <div class="filter-controls">
           <select id="board_val">
             <option value="主板">主板</option>
@@ -1003,7 +1394,7 @@
 
       <div class="filter-item active" id="fi-no-st">
         <input type="checkbox" id="no_st_enabled" checked onchange="toggleFilter(this,'fi-no-st')">
-        <span class="filter-label">排除ST</span>
+        <span class="filter-label" data-i18n="f_no_st">排除ST</span>
         <div class="filter-controls">
           <span class="filter-sep" style="color:#8a7a5a;">自动排除ST/*ST股票</span>
         </div>
@@ -1012,12 +1403,12 @@
     </div>
 
     <!-- ===== 技术面 ===== -->
-    <div class="section-title">技术面</div>
+    <div class="section-title" data-i18n="sec_technical">技术面</div>
     <div class="filters">
 
       <div class="filter-item" id="fi-above-ma">
         <input type="checkbox" id="above_ma_enabled" onchange="toggleFilter(this,'fi-above-ma')">
-        <span class="filter-label">均线上方</span>
+        <span class="filter-label" data-i18n="f_above_ma">均线上方</span>
         <div class="filter-controls">
           <span class="filter-sep">股价站上</span>
           <select id="above_ma_val">
@@ -1034,7 +1425,7 @@
 
       <div class="filter-item" id="fi-amplitude">
         <input type="checkbox" id="amplitude_enabled" onchange="toggleFilter(this,'fi-amplitude')">
-        <span class="filter-label">今日振幅</span>
+        <span class="filter-label" data-i18n="f_amplitude">今日振幅</span>
         <div class="filter-controls">
           <select id="amplitude_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="amplitude_val" value="5" step="1">
@@ -1044,7 +1435,7 @@
 
       <div class="filter-item" id="fi-concept">
         <input type="checkbox" id="concept_enabled" onchange="toggleFilter(this,'fi-concept')">
-        <span class="filter-label">概念板块</span>
+        <span class="filter-label" data-i18n="f_concept">概念板块</span>
         <div class="filter-controls">
           <input type="text" id="concept_val" placeholder="如：人工智能、芯片" style="width:160px;">
         </div>
@@ -1053,11 +1444,11 @@
     </div>
 
     <!-- ===== 盈利质量 ===== -->
-    <div class="section-title">盈利质量</div>
+    <div class="section-title" data-i18n="sec_earning_q">盈利质量</div>
     <div class="filters">
       <div class="filter-item" id="fi-cash-content">
         <input type="checkbox" id="cash_content_enabled" onchange="toggleFilter(this,'fi-cash-content')">
-        <span class="filter-label">净利现金含量</span>
+        <span class="filter-label" data-i18n="f_cash_content">净利现金含量</span>
         <div class="filter-controls">
           <select id="cash_content_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="cash_content_val" value="80" step="10">
@@ -1066,7 +1457,7 @@
       </div>
       <div class="filter-item" id="fi-ar-turnover">
         <input type="checkbox" id="ar_turnover_enabled" onchange="toggleFilter(this,'fi-ar-turnover')">
-        <span class="filter-label">应收账款周转</span>
+        <span class="filter-label" data-i18n="f_ar_turnover">应收账款周转</span>
         <div class="filter-controls">
           <select id="ar_turnover_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="ar_turnover_val" value="5" step="1">
@@ -1075,7 +1466,7 @@
       </div>
       <div class="filter-item" id="fi-inv-turnover">
         <input type="checkbox" id="inv_turnover_enabled" onchange="toggleFilter(this,'fi-inv-turnover')">
-        <span class="filter-label">存货周转率</span>
+        <span class="filter-label" data-i18n="f_inv_turnover">存货周转率</span>
         <div class="filter-controls">
           <select id="inv_turnover_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="inv_turnover_val" value="3" step="1">
@@ -1084,7 +1475,7 @@
       </div>
       <div class="filter-item" id="fi-sell-expense">
         <input type="checkbox" id="sell_expense_enabled" onchange="toggleFilter(this,'fi-sell-expense')">
-        <span class="filter-label">销售费用率</span>
+        <span class="filter-label" data-i18n="f_sell_expense">销售费用率</span>
         <div class="filter-controls">
           <select id="sell_expense_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="sell_expense_val" value="20" step="1">
@@ -1093,7 +1484,7 @@
       </div>
       <div class="filter-item" id="fi-fin-expense">
         <input type="checkbox" id="fin_expense_enabled" onchange="toggleFilter(this,'fi-fin-expense')">
-        <span class="filter-label">财务费用率</span>
+        <span class="filter-label" data-i18n="f_fin_expense">财务费用率</span>
         <div class="filter-controls">
           <select id="fin_expense_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="fin_expense_val" value="5" step="1">
@@ -1102,7 +1493,7 @@
       </div>
       <div class="filter-item" id="fi-single-q-revenue">
         <input type="checkbox" id="single_q_revenue_enabled" onchange="toggleFilter(this,'fi-single-q-revenue')">
-        <span class="filter-label">单季营收增速</span>
+        <span class="filter-label" data-i18n="f_sq_revenue">单季营收增速</span>
         <div class="filter-controls">
           <select id="single_q_revenue_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="single_q_revenue_val" value="20" step="5">
@@ -1111,7 +1502,7 @@
       </div>
       <div class="filter-item" id="fi-single-q-profit">
         <input type="checkbox" id="single_q_profit_enabled" onchange="toggleFilter(this,'fi-single-q-profit')">
-        <span class="filter-label">单季利润增速</span>
+        <span class="filter-label" data-i18n="f_sq_profit">单季利润增速</span>
         <div class="filter-controls">
           <select id="single_q_profit_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="single_q_profit_val" value="20" step="5">
@@ -1121,11 +1512,11 @@
     </div>
 
     <!-- ===== 价值投资 ===== -->
-    <div class="section-title">价值投资</div>
+    <div class="section-title" data-i18n="sec_value">价值投资</div>
     <div class="filters">
       <div class="filter-item" id="fi-fcf">
         <input type="checkbox" id="fcf_enabled" onchange="toggleFilter(this,'fi-fcf')">
-        <span class="filter-label">自由现金流</span>
+        <span class="filter-label" data-i18n="f_fcf">自由现金流</span>
         <div class="filter-controls">
           <select id="fcf_type">
             <option value="为正">为正</option><option value="为负">为负</option>
@@ -1135,7 +1526,7 @@
       </div>
       <div class="filter-item" id="fi-ev-ebitda">
         <input type="checkbox" id="ev_ebitda_enabled" onchange="toggleFilter(this,'fi-ev-ebitda')">
-        <span class="filter-label">EV/EBITDA</span>
+        <span class="filter-label" data-i18n="f_ev_ebitda">EV/EBITDA</span>
         <div class="filter-controls">
           <input type="number" id="ev_ebitda_min" value="0" step="1">
           <span class="filter-sep">~</span>
@@ -1144,7 +1535,7 @@
       </div>
       <div class="filter-item" id="fi-roic">
         <input type="checkbox" id="roic_enabled" onchange="toggleFilter(this,'fi-roic')">
-        <span class="filter-label">ROIC</span>
+        <span class="filter-label" data-i18n="f_roic">ROIC</span>
         <div class="filter-controls">
           <select id="roic_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="roic_val" value="10" step="1">
@@ -1153,7 +1544,7 @@
       </div>
       <div class="filter-item" id="fi-payout">
         <input type="checkbox" id="payout_enabled" onchange="toggleFilter(this,'fi-payout')">
-        <span class="filter-label">分红率</span>
+        <span class="filter-label" data-i18n="f_payout">分红率</span>
         <div class="filter-controls">
           <select id="payout_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="payout_val" value="30" step="5">
@@ -1162,7 +1553,7 @@
       </div>
       <div class="filter-item" id="fi-cont-dividend">
         <input type="checkbox" id="cont_dividend_enabled" onchange="toggleFilter(this,'fi-cont-dividend')">
-        <span class="filter-label">连续分红</span>
+        <span class="filter-label" data-i18n="f_cont_dividend">连续分红</span>
         <div class="filter-controls">
           <span class="filter-sep">连续</span>
           <select id="cont_dividend_val">
@@ -1175,11 +1566,11 @@
     </div>
 
     <!-- ===== 分析师预期 ===== -->
-    <div class="section-title">分析师预期</div>
+    <div class="section-title" data-i18n="sec_analyst">分析师预期</div>
     <div class="filters">
       <div class="filter-item" id="fi-consensus-growth">
         <input type="checkbox" id="consensus_growth_enabled" onchange="toggleFilter(this,'fi-consensus-growth')">
-        <span class="filter-label">预期净利增速</span>
+        <span class="filter-label" data-i18n="f_consensus">预期净利增速</span>
         <div class="filter-controls">
           <select id="consensus_growth_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="consensus_growth_val" value="20" step="5">
@@ -1188,7 +1579,7 @@
       </div>
       <div class="filter-item" id="fi-research-count">
         <input type="checkbox" id="research_count_enabled" onchange="toggleFilter(this,'fi-research-count')">
-        <span class="filter-label">机构调研</span>
+        <span class="filter-label" data-i18n="f_research">机构调研</span>
         <div class="filter-controls">
           <span class="filter-sep">近3月</span>
           <select id="research_count_op"><option value="大于">></option><option value="小于"><</option></select>
@@ -1198,7 +1589,7 @@
       </div>
       <div class="filter-item" id="fi-analyst-rating">
         <input type="checkbox" id="analyst_rating_enabled" onchange="toggleFilter(this,'fi-analyst-rating')">
-        <span class="filter-label">分析师评级</span>
+        <span class="filter-label" data-i18n="f_rating">分析师评级</span>
         <div class="filter-controls">
           <select id="analyst_rating_val">
             <option value="买入">买入</option><option value="增持">增持</option>
@@ -1208,7 +1599,7 @@
       </div>
       <div class="filter-item" id="fi-forecast-type">
         <input type="checkbox" id="forecast_type_enabled" onchange="toggleFilter(this,'fi-forecast-type')">
-        <span class="filter-label">业绩预告</span>
+        <span class="filter-label" data-i18n="f_forecast">业绩预告</span>
         <div class="filter-controls">
           <select id="forecast_type_val">
             <option value="预增">预增</option><option value="略增">略增</option>
@@ -1220,11 +1611,11 @@
     </div>
 
     <!-- ===== 资金进阶 ===== -->
-    <div class="section-title">资金进阶</div>
+    <div class="section-title" data-i18n="sec_cap_adv">资金进阶</div>
     <div class="filters">
       <div class="filter-item" id="fi-margin">
         <input type="checkbox" id="margin_enabled" onchange="toggleFilter(this,'fi-margin')">
-        <span class="filter-label">融资融券</span>
+        <span class="filter-label" data-i18n="f_margin">融资融券</span>
         <div class="filter-controls">
           <select id="margin_type">
             <option value="融资净买入">融资净买入</option>
@@ -1234,14 +1625,14 @@
       </div>
       <div class="filter-item" id="fi-shareholder-reduce">
         <input type="checkbox" id="shareholder_reduce_enabled" onchange="toggleFilter(this,'fi-shareholder-reduce')">
-        <span class="filter-label">大股东减持</span>
+        <span class="filter-label" data-i18n="f_sh_reduce">大股东减持</span>
         <div class="filter-controls">
           <span class="filter-sep" style="color:#8a7a5a;">近3月无大股东减持</span>
         </div>
       </div>
       <div class="filter-item" id="fi-unlock">
         <input type="checkbox" id="unlock_enabled" onchange="toggleFilter(this,'fi-unlock')">
-        <span class="filter-label">解禁压力</span>
+        <span class="filter-label" data-i18n="f_unlock">解禁压力</span>
         <div class="filter-controls">
           <span class="filter-sep">未来1月解禁</span>
           <select id="unlock_op"><option value="小于"><</option><option value="大于">></option></select>
@@ -1251,14 +1642,14 @@
       </div>
       <div class="filter-item" id="fi-buyback">
         <input type="checkbox" id="buyback_enabled" onchange="toggleFilter(this,'fi-buyback')">
-        <span class="filter-label">回购计划</span>
+        <span class="filter-label" data-i18n="f_buyback">回购计划</span>
         <div class="filter-controls">
           <span class="filter-sep" style="color:#8a7a5a;">有回购计划的公司</span>
         </div>
       </div>
       <div class="filter-item" id="fi-index-member">
         <input type="checkbox" id="index_member_enabled" onchange="toggleFilter(this,'fi-index-member')">
-        <span class="filter-label">指数成分</span>
+        <span class="filter-label" data-i18n="f_index">指数成分</span>
         <div class="filter-controls">
           <select id="index_member_val">
             <option value="沪深300">沪深300</option>
@@ -1273,11 +1664,11 @@
     </div>
 
     <!-- ===== 技术面进阶 ===== -->
-    <div class="section-title">技术面进阶</div>
+    <div class="section-title" data-i18n="sec_tech_adv">技术面进阶</div>
     <div class="filters">
       <div class="filter-item" id="fi-macd">
         <input type="checkbox" id="macd_enabled" onchange="toggleFilter(this,'fi-macd')">
-        <span class="filter-label">MACD</span>
+        <span class="filter-label" data-i18n="f_macd">MACD</span>
         <div class="filter-controls">
           <select id="macd_period">
             <option value="日线">日线</option><option value="周线">周线</option>
@@ -1289,7 +1680,7 @@
       </div>
       <div class="filter-item" id="fi-rsi">
         <input type="checkbox" id="rsi_enabled" onchange="toggleFilter(this,'fi-rsi')">
-        <span class="filter-label">RSI</span>
+        <span class="filter-label" data-i18n="f_rsi">RSI</span>
         <div class="filter-controls">
           <input type="number" id="rsi_min" value="30" step="5">
           <span class="filter-sep">~</span>
@@ -1298,7 +1689,7 @@
       </div>
       <div class="filter-item" id="fi-new-high">
         <input type="checkbox" id="new_high_enabled" onchange="toggleFilter(this,'fi-new-high')">
-        <span class="filter-label">创新高</span>
+        <span class="filter-label" data-i18n="f_new_high">创新高</span>
         <div class="filter-controls">
           <span class="filter-sep">创</span>
           <select id="new_high_val">
@@ -1310,7 +1701,7 @@
       </div>
       <div class="filter-item" id="fi-drawdown">
         <input type="checkbox" id="drawdown_enabled" onchange="toggleFilter(this,'fi-drawdown')">
-        <span class="filter-label">高点回撤</span>
+        <span class="filter-label" data-i18n="f_drawdown">高点回撤</span>
         <div class="filter-controls">
           <span class="filter-sep">距250日高点</span>
           <select id="drawdown_op"><option value="大于">></option><option value="小于"><</option></select>
@@ -1320,7 +1711,7 @@
       </div>
       <div class="filter-item" id="fi-vol-break">
         <input type="checkbox" id="vol_break_enabled" onchange="toggleFilter(this,'fi-vol-break')">
-        <span class="filter-label">放量突破</span>
+        <span class="filter-label" data-i18n="f_vol_break">放量突破</span>
         <div class="filter-controls">
           <span class="filter-sep">今日量 ></span>
           <select id="vol_break_val">
@@ -1333,18 +1724,18 @@
     </div>
 
     <!-- ===== 风险进阶 ===== -->
-    <div class="section-title">风险进阶</div>
+    <div class="section-title" data-i18n="sec_risk_adv">风险进阶</div>
     <div class="filters">
       <div class="filter-item" id="fi-audit">
         <input type="checkbox" id="audit_enabled" onchange="toggleFilter(this,'fi-audit')">
-        <span class="filter-label">审计意见</span>
+        <span class="filter-label" data-i18n="f_audit">审计意见</span>
         <div class="filter-controls">
           <span class="filter-sep" style="color:#8a7a5a;">标准无保留意见</span>
         </div>
       </div>
       <div class="filter-item" id="fi-controller">
         <input type="checkbox" id="controller_enabled" onchange="toggleFilter(this,'fi-controller')">
-        <span class="filter-label">实控人性质</span>
+        <span class="filter-label" data-i18n="f_controller">实控人性质</span>
         <div class="filter-controls">
           <select id="controller_val">
             <option value="国企">国企</option><option value="民企">民企</option>
@@ -1354,7 +1745,7 @@
       </div>
       <div class="filter-item" id="fi-interest-debt">
         <input type="checkbox" id="interest_debt_enabled" onchange="toggleFilter(this,'fi-interest-debt')">
-        <span class="filter-label">有息负债率</span>
+        <span class="filter-label" data-i18n="f_interest_debt">有息负债率</span>
         <div class="filter-controls">
           <select id="interest_debt_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="interest_debt_val" value="40" step="5">
@@ -1365,21 +1756,22 @@
 
     <!-- 自定义条件 -->
     <div class="custom-row" style="margin-top:20px;">
-      <span class="filter-label">自定义条件</span>
+      <span class="filter-label" data-i18n="f_custom">自定义条件</span>
       <input type="text" id="custom" placeholder="例如：连续3年扣非净利润增长率大于20%、市盈率历史百分位低于30%">
     </div>
 
     <div class="query-preview" id="queryPreview">点击"开始筛选"查看查询语句</div>
 
     <div class="actions">
-      <button class="btn btn-primary" id="btnSearch" onclick="doSearch()">开始筛选</button>
-      <button class="btn btn-secondary" onclick="resetFilters()">重置条件</button>
+      <button class="btn btn-primary" id="btnSearch" onclick="doSearch()" data-i18n="btn_search">开始筛选</button>
+      <button class="btn btn-secondary" onclick="resetFilters()" data-i18n="btn_reset">重置条件</button>
+      <span style="font-size:11px;color:var(--text-tertiary);margin-left:8px;line-height:1.5;max-width:500px;" data-i18n="hint_api">提示：如遇"问财查询暂时不可用"，是接口临时抽风，少勾几个条件或等几秒再查即可</span>
     </div>
   </div>
 
   <div class="panel" id="resultPanel" style="display:none;">
     <div class="result-info">
-      <div class="panel-title">筛选结果</div>
+      <div class="panel-title" data-i18n="result_title">筛选结果</div>
       <div style="display:flex;align-items:center;gap:12px;">
         <span class="result-count">共 <strong id="totalCount">0</strong> 只</span>
         <button class="btn btn-secondary export-btn" onclick="exportCSV()">导出 CSV</button>
@@ -1409,6 +1801,21 @@ function toggleFilter(cb, id) {
   document.getElementById(id).classList.toggle('active', cb.checked);
 }
 
+function toggleGoodwillMode() {
+  const mode = document.getElementById('goodwill_mode').value;
+  const unitSel = document.getElementById('goodwill_unit');
+  const pctUnit = document.getElementById('goodwill_pct_unit');
+  if (mode === 'pct') {
+    unitSel.style.display = 'none';
+    pctUnit.style.display = '';
+    document.getElementById('goodwill_val').value = '10';
+  } else {
+    unitSel.style.display = '';
+    pctUnit.style.display = 'none';
+    document.getElementById('goodwill_val').value = '10';
+  }
+}
+
 function val(id) { return document.getElementById(id).value; }
 function chk(id) { return document.getElementById(id).checked; }
 
@@ -1418,13 +1825,13 @@ function buildPayload() {
     revenue_op: val('revenue_op'), revenue_val: val('revenue_val'), revenue_unit: val('revenue_unit'),
 
     revenue_growth_enabled: chk('revenue_growth_enabled'),
-    revenue_growth_op: val('revenue_growth_op'), revenue_growth_val: val('revenue_growth_val'),
+    revenue_growth_period: val('revenue_growth_period'), revenue_growth_op: val('revenue_growth_op'), revenue_growth_val: val('revenue_growth_val'),
 
     profit_enabled: chk('profit_enabled'),
     profit_op: val('profit_op'), profit_val: val('profit_val'), profit_unit: val('profit_unit'),
 
     profit_growth_enabled: chk('profit_growth_enabled'),
-    profit_growth_op: val('profit_growth_op'), profit_growth_val: val('profit_growth_val'),
+    profit_growth_period: val('profit_growth_period'), profit_growth_op: val('profit_growth_op'), profit_growth_val: val('profit_growth_val'),
 
     gross_margin_enabled: chk('gross_margin_enabled'),
     gross_margin_min: val('gross_margin_min'), gross_margin_max: val('gross_margin_max'),
@@ -1440,6 +1847,9 @@ function buildPayload() {
 
     cashflow_enabled: chk('cashflow_enabled'),
     cashflow_type: val('cashflow_type'),
+    cashflow_consecutive_enabled: chk('cashflow_consecutive_enabled'),
+    cashflow_consecutive_years: val('cashflow_consecutive_years'),
+    cashflow_consecutive_type: val('cashflow_consecutive_type'),
 
     pe_enabled: chk('pe_enabled'),
     pe_min: val('pe_min'), pe_max: val('pe_max'),
@@ -1451,13 +1861,13 @@ function buildPayload() {
     ps_min: val('ps_min'), ps_max: val('ps_max'),
 
     dividend_enabled: chk('dividend_enabled'),
-    dividend_op: val('dividend_op'), dividend_val: val('dividend_val'),
+    dividend_min: val('dividend_min'), dividend_max: val('dividend_max'),
 
     mcap_enabled: chk('mcap_enabled'),
     mcap_min: val('mcap_min'), mcap_max: val('mcap_max'), mcap_unit: val('mcap_unit'),
 
     goodwill_enabled: chk('goodwill_enabled'),
-    goodwill_op: val('goodwill_op'), goodwill_val: val('goodwill_val'), goodwill_unit: val('goodwill_unit'),
+    goodwill_mode: val('goodwill_mode'), goodwill_op: val('goodwill_op'), goodwill_val: val('goodwill_val'), goodwill_unit: val('goodwill_unit'),
 
     debt_ratio_enabled: chk('debt_ratio_enabled'),
     debt_ratio_min: val('debt_ratio_min'), debt_ratio_max: val('debt_ratio_max'),
@@ -1475,7 +1885,7 @@ function buildPayload() {
     pct_change_period: val('pct_change_period'), pct_change_op: val('pct_change_op'), pct_change_val: val('pct_change_val'),
 
     turnover_enabled: chk('turnover_enabled'),
-    turnover_op: val('turnover_op'), turnover_val: val('turnover_val'),
+    turnover_period: val('turnover_period'), turnover_op: val('turnover_op'), turnover_val: val('turnover_val'),
 
     // 成长质量
     net_profit_enabled: chk('net_profit_enabled'),
@@ -1727,26 +2137,27 @@ function resetFilters() {
   // 恢复默认值
   const defaults = {
     revenue_op:'大于', revenue_val:'50', revenue_unit:'亿',
-    revenue_growth_op:'大于', revenue_growth_val:'10',
+    revenue_growth_period:'', revenue_growth_op:'大于', revenue_growth_val:'10',
     profit_op:'大于', profit_val:'5', profit_unit:'亿',
-    profit_growth_op:'大于', profit_growth_val:'10',
+    profit_growth_period:'', profit_growth_op:'大于', profit_growth_val:'10',
     gross_margin_min:'30', gross_margin_max:'100',
     net_margin_min:'10', net_margin_max:'100',
     roe_min:'10', roe_max:'100',
     eps_op:'大于', eps_val:'1',
     cashflow_type:'为正',
+    cashflow_consecutive_years:'5', cashflow_consecutive_type:'为正',
     pe_min:'0', pe_max:'25',
     pb_min:'0', pb_max:'3',
     ps_min:'0', ps_max:'10',
-    dividend_op:'大于', dividend_val:'3',
+    dividend_min:'3', dividend_max:'100',
     mcap_min:'100', mcap_max:'5000', mcap_unit:'亿',
-    goodwill_op:'小于', goodwill_val:'10', goodwill_unit:'亿',
+    goodwill_mode:'abs', goodwill_op:'小于', goodwill_val:'10', goodwill_unit:'亿',
     debt_ratio_min:'0', debt_ratio_max:'60',
     current_ratio_op:'大于', current_ratio_val:'1.5',
     industry_val:'',
     listing_years_op:'大于', listing_years_val:'3',
     pct_change_period:'近一个月', pct_change_op:'大于', pct_change_val:'5',
-    turnover_op:'大于', turnover_val:'1',
+    turnover_period:'今日', turnover_op:'大于', turnover_val:'1',
     // 成长质量
     net_profit_op:'大于', net_profit_val:'5', net_profit_unit:'亿',
     net_profit_growth_op:'大于', net_profit_growth_val:'10',
@@ -1869,6 +2280,259 @@ async function loadAIRecommend() {
 
 // 页面加载自动请求
 loadAIRecommend();
+
+// ===== Theme Toggle =====
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle('light');
+  const isLight = body.classList.contains('light');
+  document.getElementById('themeIcon').innerHTML = isLight ? '&#9790;' : '&#9788;';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+// 恢复上次主题
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light');
+  document.getElementById('themeIcon').innerHTML = '&#9790;';
+}
+
+// ===== Language Toggle =====
+const I18N = {
+  en: {
+    title: 'A-Share Smart Screener',
+    subtitle: 'Crafted by CC',
+    tagline1: 'The next Buffett is YOU',
+    tagline2: 'Stock market involves risk. Recommendations on this page do not constitute investment advice.',
+    ai_title: "CC's Daily Picks",
+    ai_disclaimer: 'Note: Not financial advice. May be inaccurate. Not liable for losses.',
+    ai_refresh: 'Refresh',
+    filter_title: 'Filter Conditions',
+    sec_profit: 'Profitability', sec_cashflow: 'Cash Flow', sec_valuation: 'Valuation',
+    sec_health: 'Financial Health', sec_market: 'Market Performance', sec_growth: 'Growth Quality',
+    sec_val_adv: 'Advanced Valuation', sec_capital: 'Capital & Chips', sec_risk: 'Risk Screening',
+    sec_technical: 'Technical', sec_earning_q: 'Earnings Quality', sec_value: 'Value Investing',
+    sec_analyst: 'Analyst Expectations', sec_cap_adv: 'Advanced Capital', sec_tech_adv: 'Advanced Technical',
+    sec_risk_adv: 'Advanced Risk',
+    f_revenue: 'Revenue', f_rev_growth: 'Revenue Growth', f_profit: 'Net Profit (ex.)',
+    f_profit_growth: 'Profit Growth', f_gross_margin: 'Gross Margin', f_net_margin: 'Net Margin',
+    f_roe: 'ROE', f_eps: 'EPS', f_cashflow: 'Operating CF',
+    f_cashflow_consecutive: 'Consecutive CF', f_cashflow_consecutive_prefix: '', f_cashflow_consecutive_mid: 'yrs', f_cashflow_consecutive_suffix: 'yrs positive',
+    f_pe: 'P/E Ratio',
+    f_pb: 'P/B Ratio', f_ps: 'P/S Ratio', f_dividend: 'Dividend Yield', f_mcap: 'Market Cap',
+    f_goodwill: 'Goodwill', f_debt_ratio: 'Debt Ratio', f_current_ratio: 'Current Ratio',
+    f_industry: 'Industry', f_listing_years: 'Years Listed', f_pct_change: 'Price Change',
+    f_turnover: 'Turnover Rate', f_net_profit: 'Net Profit', f_np_growth: 'NP Growth',
+    f_cont_growth: 'Consecutive Growth', f_roa: 'ROA', f_rd_ratio: 'R&D Ratio',
+    f_peg: 'PEG', f_pcf: 'P/CF Ratio', f_float_mcap: 'Float Cap',
+    f_holders: 'Shareholders', f_north_fund: 'Northbound', f_fund_hold: 'Fund Holdings',
+    f_main_fund: 'Main Capital', f_vol_ratio: 'Volume Ratio', f_pledge: 'Pledge Ratio',
+    f_board: 'Board', f_no_st: 'Exclude ST', f_above_ma: 'Above MA', f_amplitude: 'Amplitude',
+    f_concept: 'Concept', f_cash_content: 'Cash Content', f_ar_turnover: 'AR Turnover',
+    f_inv_turnover: 'Inv Turnover', f_sell_expense: 'Selling Expense', f_fin_expense: 'Finance Expense',
+    f_sq_revenue: 'Quarterly Rev', f_sq_profit: 'Quarterly Profit', f_fcf: 'Free Cash Flow',
+    f_ev_ebitda: 'EV/EBITDA', f_roic: 'ROIC', f_payout: 'Payout Ratio',
+    f_cont_dividend: 'Consecutive Div', f_consensus: 'Consensus Growth', f_research: 'Research Visits',
+    f_rating: 'Analyst Rating', f_forecast: 'Earnings Forecast', f_margin: 'Margin Trading',
+    f_sh_reduce: 'Insider Selling', f_unlock: 'Unlock Pressure', f_buyback: 'Buyback Plan',
+    f_index: 'Index Member', f_macd: 'MACD', f_rsi: 'RSI', f_new_high: 'New High',
+    f_drawdown: 'Drawdown', f_vol_break: 'Vol Breakout', f_audit: 'Audit Opinion',
+    f_controller: 'Controller Type', f_interest_debt: 'Interest Debt', f_custom: 'Custom Query',
+    btn_search: 'Search', btn_reset: 'Reset',
+    hint_api: 'Tip: If you see "query unavailable", the API is temporarily unstable. Use fewer filters or retry later.',
+    result_title: 'Results',
+  },
+  zh: {
+    title: 'A股智能选股器',
+    subtitle: 'CC匠心之作',
+    tagline1: '下一个巴菲特就是你',
+    tagline2: '股市有风险，本页面的股票推荐系统不构成投资建议',
+    ai_title: 'CC今日推荐',
+    ai_disclaimer: '注：不要信、不一定准、亏钱不要找我、和我没关系',
+    ai_refresh: '刷新推荐',
+    filter_title: '筛选条件',
+    sec_profit: '盈利能力', sec_cashflow: '现金流', sec_valuation: '估值指标',
+    sec_health: '财务健康', sec_market: '市场表现', sec_growth: '成长质量',
+    sec_val_adv: '估值进阶', sec_capital: '资金与筹码', sec_risk: '风险筛选',
+    sec_technical: '技术面', sec_earning_q: '盈利质量', sec_value: '价值投资',
+    sec_analyst: '分析师预期', sec_cap_adv: '资金进阶', sec_tech_adv: '技术面进阶',
+    sec_risk_adv: '风险进阶',
+    f_revenue: '营业总收入', f_rev_growth: '营收增长率', f_profit: '扣非净利润',
+    f_profit_growth: '扣非净利增长', f_gross_margin: '毛利率', f_net_margin: '净利率',
+    f_roe: 'ROE', f_eps: '每股收益', f_cashflow: '经营现金流',
+    f_cashflow_consecutive: '连续经营现金流', f_cashflow_consecutive_prefix: '连续', f_cashflow_consecutive_mid: '年', f_cashflow_consecutive_suffix: '年为正',
+    f_pe: '市盈率 (PE)',
+    f_pb: '市净率 (PB)', f_ps: '市销率 (PS)', f_dividend: '股息率', f_mcap: '总市值',
+    f_goodwill: '商誉', f_debt_ratio: '资产负债率', f_current_ratio: '流动比率',
+    f_industry: '所属行业', f_listing_years: '上市年限', f_pct_change: '区间涨跌幅',
+    f_turnover: '换手率', f_net_profit: '归母净利润', f_np_growth: '归母净利增长',
+    f_cont_growth: '连续增长', f_roa: 'ROA', f_rd_ratio: '研发费用率',
+    f_peg: 'PEG', f_pcf: '市现率 (PCF)', f_float_mcap: '流通市值',
+    f_holders: '股东人数', f_north_fund: '北向持股', f_fund_hold: '基金持仓',
+    f_main_fund: '今日主力', f_vol_ratio: '量比', f_pledge: '质押比例',
+    f_board: '上市板块', f_no_st: '排除ST', f_above_ma: '均线上方', f_amplitude: '今日振幅',
+    f_concept: '概念板块', f_cash_content: '净利现金含量', f_ar_turnover: '应收账款周转',
+    f_inv_turnover: '存货周转率', f_sell_expense: '销售费用率', f_fin_expense: '财务费用率',
+    f_sq_revenue: '单季营收增速', f_sq_profit: '单季利润增速', f_fcf: '自由现金流',
+    f_ev_ebitda: 'EV/EBITDA', f_roic: 'ROIC', f_payout: '分红率',
+    f_cont_dividend: '连续分红', f_consensus: '预期净利增速', f_research: '机构调研',
+    f_rating: '分析师评级', f_forecast: '业绩预告', f_margin: '融资融券',
+    f_sh_reduce: '大股东减持', f_unlock: '解禁压力', f_buyback: '回购计划',
+    f_index: '指数成分', f_macd: 'MACD', f_rsi: 'RSI', f_new_high: '创新高',
+    f_drawdown: '高点回撤', f_vol_break: '放量突破', f_audit: '审计意见',
+    f_controller: '实控人性质', f_interest_debt: '有息负债率', f_custom: '自定义条件',
+    btn_search: '开始筛选', btn_reset: '重置条件',
+    hint_api: '提示：如遇"问财查询暂时不可用"，是接口临时抽风，少勾几个条件或等几秒再查即可',
+    result_title: '筛选结果',
+  }
+};
+
+let currentLang = 'zh';
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  document.getElementById('langLabel').textContent = currentLang === 'zh' ? 'EN' : '中';
+  applyLang();
+  localStorage.setItem('lang', currentLang);
+}
+function applyLang() {
+  const dict = I18N[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) el.textContent = dict[key];
+  });
+}
+// 恢复上次语言
+if (localStorage.getItem('lang') === 'en') {
+  currentLang = 'en';
+  document.getElementById('langLabel').textContent = '中';
+  applyLang();
+}
+</script>
+
+<script>
+// ===== Gold Particle & Lines Background =====
+(function(){
+  const canvas = document.getElementById('goldCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles, lines;
+  const PARTICLE_COUNT = 80;
+  const LINE_COUNT = 10;
+  const CONNECT_DIST = 200;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2.5 + 0.8,
+        alpha: Math.random() * 0.5 + 0.25,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function initLines() {
+    lines = [];
+    for (let i = 0; i < LINE_COUNT; i++) {
+      lines.push({
+        x1: Math.random() * w,
+        y1: Math.random() * h,
+        len: Math.random() * 500 + 300,
+        angle: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.0005 + 0.0002,
+        drift: Math.random() * 0.2 + 0.08,
+        alpha: Math.random() * 0.12 + 0.06,
+        width: Math.random() * 1.2 + 0.5
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw flowing gold lines
+    for (const l of lines) {
+      l.angle += l.speed;
+      l.x1 += Math.sin(l.angle * 3) * l.drift;
+      l.y1 += Math.cos(l.angle * 2) * l.drift * 0.5;
+      if (l.x1 < -200) l.x1 = w + 200;
+      if (l.x1 > w + 200) l.x1 = -200;
+      if (l.y1 < -200) l.y1 = h + 200;
+      if (l.y1 > h + 200) l.y1 = -200;
+      const x2 = l.x1 + Math.cos(l.angle) * l.len;
+      const y2 = l.y1 + Math.sin(l.angle) * l.len;
+      const grad = ctx.createLinearGradient(l.x1, l.y1, x2, y2);
+      grad.addColorStop(0, 'rgba(200,168,78,0)');
+      grad.addColorStop(0.3, 'rgba(200,168,78,' + l.alpha * 0.6 + ')');
+      grad.addColorStop(0.5, 'rgba(200,168,78,' + l.alpha + ')');
+      grad.addColorStop(0.7, 'rgba(200,168,78,' + l.alpha * 0.6 + ')');
+      grad.addColorStop(1, 'rgba(200,168,78,0)');
+      ctx.beginPath();
+      ctx.moveTo(l.x1, l.y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = l.width;
+      ctx.stroke();
+    }
+
+    // Draw particles
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.pulse += 0.02;
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+      const a = p.alpha * (0.5 + 0.5 * Math.sin(p.pulse));
+      // Glow
+      const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      grd.addColorStop(0, 'rgba(200,168,78,' + a * 0.5 + ')');
+      grd.addColorStop(1, 'rgba(200,168,78,0)');
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+      // Core
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(220,190,90,' + a + ')';
+      ctx.fill();
+    }
+
+    // Draw connections between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECT_DIST) {
+          const a = 0.12 * (1 - dist / CONNECT_DIST);
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(200,168,78,' + a + ')';
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initParticles();
+  initLines();
+  draw();
+  window.addEventListener('resize', () => { resize(); initParticles(); initLines(); });
+})();
 </script>
 </body>
 </html>

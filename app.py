@@ -17,6 +17,11 @@ def index():
     return send_from_directory(".", "index.html")
 
 
+@app.route("/favicon.svg")
+def favicon():
+    return send_from_directory(".", "favicon.svg", mimetype="image/svg+xml")
+
+
 @app.route("/api/screen", methods=["POST"])
 def screen():
     data = request.json
@@ -30,9 +35,13 @@ def screen():
         conditions.append(f"营业总收入{op}{val}{unit}")
 
     if data.get("revenue_growth_enabled"):
+        period = data.get("revenue_growth_period", "")
         op = data.get("revenue_growth_op", "大于")
         val = data.get("revenue_growth_val", "10")
-        conditions.append(f"营业总收入同比增长率{op}{val}%")
+        if period:
+            conditions.append(f"{period}营业总收入同比增长率{op}{val}%")
+        else:
+            conditions.append(f"营业总收入同比增长率{op}{val}%")
 
     if data.get("profit_enabled"):
         op = data.get("profit_op", "大于")
@@ -41,9 +50,13 @@ def screen():
         conditions.append(f"扣非净利润{op}{val}{unit}")
 
     if data.get("profit_growth_enabled"):
+        period = data.get("profit_growth_period", "")
         op = data.get("profit_growth_op", "大于")
         val = data.get("profit_growth_val", "10")
-        conditions.append(f"扣非净利润同比增长率{op}{val}%")
+        if period:
+            conditions.append(f"{period}扣非净利润同比增长率{op}{val}%")
+        else:
+            conditions.append(f"扣非净利润同比增长率{op}{val}%")
 
     if data.get("gross_margin_enabled"):
         gm_min = data.get("gross_margin_min", "30")
@@ -70,6 +83,11 @@ def screen():
         cashflow_type = data.get("cashflow_type", "为正")
         conditions.append(f"经营现金流{cashflow_type}")
 
+    if data.get("cashflow_consecutive_enabled"):
+        years = data.get("cashflow_consecutive_years", "5")
+        cf_type = data.get("cashflow_consecutive_type", "为正")
+        conditions.append(f"连续{years}年经营现金流{cf_type}")
+
     # === 估值指标 ===
     if data.get("pe_enabled"):
         pe_min = data.get("pe_min", "0")
@@ -87,9 +105,9 @@ def screen():
         conditions.append(f"市销率大于{ps_min}且市销率小于{ps_max}")
 
     if data.get("dividend_enabled"):
-        op = data.get("dividend_op", "大于")
-        val = data.get("dividend_val", "3")
-        conditions.append(f"股息率{op}{val}%")
+        div_min = data.get("dividend_min", "3")
+        div_max = data.get("dividend_max", "100")
+        conditions.append(f"股息率大于{div_min}%且股息率小于{div_max}%")
 
     if data.get("mcap_enabled"):
         mcap_min = data.get("mcap_min", "100")
@@ -99,10 +117,14 @@ def screen():
 
     # === 财务健康 ===
     if data.get("goodwill_enabled"):
+        mode = data.get("goodwill_mode", "abs")
         op = data.get("goodwill_op", "小于")
         val = data.get("goodwill_val", "10")
-        unit = data.get("goodwill_unit", "亿")
-        conditions.append(f"商誉{op}{val}{unit}")
+        if mode == "pct":
+            conditions.append(f"商誉占总市值比例{op}{val}%")
+        else:
+            unit = data.get("goodwill_unit", "亿")
+            conditions.append(f"商誉{op}{val}{unit}")
 
     if data.get("debt_ratio_enabled"):
         dr_min = data.get("debt_ratio_min", "0")
@@ -132,9 +154,13 @@ def screen():
         conditions.append(f"{period}涨跌幅{op}{val}%")
 
     if data.get("turnover_enabled"):
+        period = data.get("turnover_period", "今日")
         op = data.get("turnover_op", "大于")
         val = data.get("turnover_val", "1")
-        conditions.append(f"换手率{op}{val}%")
+        if period == "今日":
+            conditions.append(f"换手率{op}{val}%")
+        else:
+            conditions.append(f"{period}换手率{op}{val}%")
 
     # === 新增：成长质量 ===
     if data.get("net_profit_enabled"):
@@ -374,7 +400,7 @@ def screen():
     if not conditions:
         return jsonify({"error": "请至少选择一个筛选条件"}), 400
 
-    query = " 且 ".join(conditions)
+    query = "，".join(conditions)
 
     # 从 pywencai 结果中提取 DataFrame
     def extract_df(result):
@@ -590,4 +616,6 @@ def recommend():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3010, debug=True)
+    import os
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=3010, debug=debug)
