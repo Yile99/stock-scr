@@ -35,7 +35,6 @@
 
   .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
 
-  /* 筛选面板 */
   .panel {
     background: linear-gradient(145deg, #131210, #1a1710);
     border-radius: 12px;
@@ -53,17 +52,29 @@
     padding-left: 10px;
   }
 
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a7a5a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 20px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #1a1508;
+  }
+  .section-title:first-child { margin-top: 0; }
+
   .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 12px;
   }
 
   .filter-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 10px 14px;
     background: #111;
     border-radius: 8px;
     border: 1px solid #252015;
@@ -77,16 +88,16 @@
   }
 
   .filter-item input[type="checkbox"] {
-    width: 18px; height: 18px;
+    width: 16px; height: 16px;
     accent-color: #d4a843;
     cursor: pointer;
     flex-shrink: 0;
   }
 
   .filter-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    min-width: 90px;
+    min-width: 80px;
     flex-shrink: 0;
     color: #c9b88a;
   }
@@ -94,7 +105,7 @@
   .filter-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     flex: 1;
     flex-wrap: wrap;
   }
@@ -102,10 +113,10 @@
   .filter-controls select,
   .filter-controls input[type="number"],
   .filter-controls input[type="text"] {
-    padding: 6px 10px;
+    padding: 5px 8px;
     border: 1px solid #2a2010;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     background: #0e0e0c;
     color: #e0d5c1;
     outline: none;
@@ -114,13 +125,13 @@
   .filter-controls select:focus,
   .filter-controls input:focus { border-color: #d4a843; box-shadow: 0 0 6px rgba(212,168,67,0.15); }
 
-  .filter-controls input[type="number"] { width: 80px; }
-  .filter-controls input[type="text"] { width: 100%; }
-  .filter-controls select { min-width: 60px; }
+  .filter-controls input[type="number"] { width: 70px; }
+  .filter-controls input[type="text"] { width: 120px; }
+  .filter-controls select { min-width: 55px; }
 
-  .filter-sep { color: #5a4a30; font-size: 13px; }
+  .filter-sep { color: #5a4a30; font-size: 12px; }
+  .filter-unit { color: #5a4a30; font-size: 12px; }
 
-  /* 自定义条件 */
   .custom-row {
     margin-top: 16px;
     display: flex;
@@ -140,7 +151,6 @@
   .custom-row input::placeholder { color: #5a4a30; }
   .custom-row input:focus { border-color: #d4a843; box-shadow: 0 0 6px rgba(212,168,67,0.15); }
 
-  /* 按钮 */
   .actions {
     margin-top: 20px;
     display: flex;
@@ -183,30 +193,23 @@
     border: 1px solid #1a1508;
   }
 
-  /* 结果 */
   .result-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
   }
-  .result-count {
-    font-size: 14px;
-    color: #8a7a5a;
-  }
+  .result-count { font-size: 14px; color: #8a7a5a; }
   .result-count strong { color: #d4a843; font-size: 18px; }
 
   .table-wrap {
     overflow-x: auto;
     border-radius: 8px;
     border: 1px solid #2a2010;
+    max-height: 70vh;
+    overflow-y: auto;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    white-space: nowrap;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
   thead th {
     background: #161410;
     padding: 10px 14px;
@@ -216,23 +219,14 @@
     border-bottom: 2px solid #2a2010;
     position: sticky;
     top: 0;
+    z-index: 1;
   }
-  tbody td {
-    padding: 9px 14px;
-    border-bottom: 1px solid #1a1508;
-    color: #c9b88a;
-  }
+  tbody td { padding: 9px 14px; border-bottom: 1px solid #1a1508; color: #c9b88a; }
   tbody tr:hover { background: #1a1710; }
   tbody tr:nth-child(even) { background: #0f0e0c; }
   tbody tr:nth-child(even):hover { background: #1a1710; }
 
-  /* 加载 */
-  .loading {
-    display: none;
-    text-align: center;
-    padding: 60px 20px;
-    color: #8a7a5a;
-  }
+  .loading { display: none; text-align: center; padding: 60px 20px; color: #8a7a5a; }
   .loading.show { display: block; }
   .spinner {
     width: 36px; height: 36px;
@@ -244,12 +238,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: #5a4a30;
-    font-size: 15px;
-  }
+  .empty { text-align: center; padding: 60px 20px; color: #5a4a30; font-size: 15px; }
 
   .error-msg {
     padding: 14px 18px;
@@ -260,12 +249,8 @@
     font-size: 14px;
   }
 
-  .export-btn {
-    padding: 6px 16px;
-    font-size: 13px;
-  }
+  .export-btn { padding: 6px 16px; font-size: 13px; }
 
-  /* 滚动条 */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #0a0a0a; }
   ::-webkit-scrollbar-thumb { background: #2a2010; border-radius: 3px; }
@@ -282,42 +267,104 @@
 </div>
 
 <div class="container">
-  <!-- 筛选条件 -->
   <div class="panel">
     <div class="panel-title">筛选条件</div>
+
+    <!-- ===== 盈利能力 ===== -->
+    <div class="section-title">盈利能力</div>
     <div class="filters">
 
-      <!-- 营业总收入 -->
-      <div class="filter-item" id="fi-revenue">
-        <input type="checkbox" id="revenue_enabled" checked onchange="toggleFilter(this, 'fi-revenue')">
+      <div class="filter-item active" id="fi-revenue">
+        <input type="checkbox" id="revenue_enabled" checked onchange="toggleFilter(this,'fi-revenue')">
         <span class="filter-label">营业总收入</span>
         <div class="filter-controls">
           <select id="revenue_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="revenue_val" value="50" min="0">
-          <select id="revenue_unit">
-            <option value="亿">亿</option>
-            <option value="万">万</option>
-          </select>
+          <select id="revenue_unit"><option value="亿">亿</option><option value="万">万</option></select>
         </div>
       </div>
 
-      <!-- 扣非净利润 -->
-      <div class="filter-item" id="fi-profit">
-        <input type="checkbox" id="profit_enabled" checked onchange="toggleFilter(this, 'fi-profit')">
+      <div class="filter-item" id="fi-revenue-growth">
+        <input type="checkbox" id="revenue_growth_enabled" onchange="toggleFilter(this,'fi-revenue-growth')">
+        <span class="filter-label">营收增长率</span>
+        <div class="filter-controls">
+          <select id="revenue_growth_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="revenue_growth_val" value="10" step="1">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item active" id="fi-profit">
+        <input type="checkbox" id="profit_enabled" checked onchange="toggleFilter(this,'fi-profit')">
         <span class="filter-label">扣非净利润</span>
         <div class="filter-controls">
           <select id="profit_op"><option value="大于">></option><option value="小于"><</option></select>
           <input type="number" id="profit_val" value="5" min="0">
-          <select id="profit_unit">
-            <option value="亿">亿</option>
-            <option value="万">万</option>
-          </select>
+          <select id="profit_unit"><option value="亿">亿</option><option value="万">万</option></select>
         </div>
       </div>
 
-      <!-- 经营现金流 -->
-      <div class="filter-item" id="fi-cashflow">
-        <input type="checkbox" id="cashflow_enabled" checked onchange="toggleFilter(this, 'fi-cashflow')">
+      <div class="filter-item" id="fi-profit-growth">
+        <input type="checkbox" id="profit_growth_enabled" onchange="toggleFilter(this,'fi-profit-growth')">
+        <span class="filter-label">扣非净利增长</span>
+        <div class="filter-controls">
+          <select id="profit_growth_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="profit_growth_val" value="10" step="1">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-gross-margin">
+        <input type="checkbox" id="gross_margin_enabled" onchange="toggleFilter(this,'fi-gross-margin')">
+        <span class="filter-label">毛利率</span>
+        <div class="filter-controls">
+          <input type="number" id="gross_margin_min" value="30" step="1">
+          <span class="filter-sep">~</span>
+          <input type="number" id="gross_margin_max" value="100" step="1">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-net-margin">
+        <input type="checkbox" id="net_margin_enabled" onchange="toggleFilter(this,'fi-net-margin')">
+        <span class="filter-label">净利率</span>
+        <div class="filter-controls">
+          <input type="number" id="net_margin_min" value="10" step="1">
+          <span class="filter-sep">~</span>
+          <input type="number" id="net_margin_max" value="100" step="1">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-roe">
+        <input type="checkbox" id="roe_enabled" onchange="toggleFilter(this,'fi-roe')">
+        <span class="filter-label">ROE</span>
+        <div class="filter-controls">
+          <input type="number" id="roe_min" value="10" step="1">
+          <span class="filter-sep">~</span>
+          <input type="number" id="roe_max" value="100" step="1">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-eps">
+        <input type="checkbox" id="eps_enabled" onchange="toggleFilter(this,'fi-eps')">
+        <span class="filter-label">每股收益</span>
+        <div class="filter-controls">
+          <select id="eps_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="eps_val" value="1" step="0.1">
+          <span class="filter-unit">元</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== 现金流 ===== -->
+    <div class="section-title">现金流</div>
+    <div class="filters">
+
+      <div class="filter-item active" id="fi-cashflow">
+        <input type="checkbox" id="cashflow_enabled" checked onchange="toggleFilter(this,'fi-cashflow')">
         <span class="filter-label">经营现金流</span>
         <div class="filter-controls">
           <select id="cashflow_type">
@@ -329,9 +376,14 @@
         </div>
       </div>
 
-      <!-- 市盈率 -->
-      <div class="filter-item" id="fi-pe">
-        <input type="checkbox" id="pe_enabled" checked onchange="toggleFilter(this, 'fi-pe')">
+    </div>
+
+    <!-- ===== 估值指标 ===== -->
+    <div class="section-title">估值指标</div>
+    <div class="filters">
+
+      <div class="filter-item active" id="fi-pe">
+        <input type="checkbox" id="pe_enabled" checked onchange="toggleFilter(this,'fi-pe')">
         <span class="filter-label">市盈率 (PE)</span>
         <div class="filter-controls">
           <input type="number" id="pe_min" value="0" min="0" step="1">
@@ -340,9 +392,8 @@
         </div>
       </div>
 
-      <!-- 市净率 -->
-      <div class="filter-item" id="fi-pb">
-        <input type="checkbox" id="pb_enabled" checked onchange="toggleFilter(this, 'fi-pb')">
+      <div class="filter-item active" id="fi-pb">
+        <input type="checkbox" id="pb_enabled" checked onchange="toggleFilter(this,'fi-pb')">
         <span class="filter-label">市净率 (PB)</span>
         <div class="filter-controls">
           <input type="number" id="pb_min" value="0" min="0" step="0.1">
@@ -351,39 +402,140 @@
         </div>
       </div>
 
-      <!-- 商誉 -->
-      <div class="filter-item" id="fi-goodwill">
-        <input type="checkbox" id="goodwill_enabled" checked onchange="toggleFilter(this, 'fi-goodwill')">
+      <div class="filter-item" id="fi-ps">
+        <input type="checkbox" id="ps_enabled" onchange="toggleFilter(this,'fi-ps')">
+        <span class="filter-label">市销率 (PS)</span>
+        <div class="filter-controls">
+          <input type="number" id="ps_min" value="0" min="0" step="0.1">
+          <span class="filter-sep">~</span>
+          <input type="number" id="ps_max" value="10" min="0" step="0.1">
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-dividend">
+        <input type="checkbox" id="dividend_enabled" onchange="toggleFilter(this,'fi-dividend')">
+        <span class="filter-label">股息率</span>
+        <div class="filter-controls">
+          <select id="dividend_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="dividend_val" value="3" step="0.5">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-mcap">
+        <input type="checkbox" id="mcap_enabled" onchange="toggleFilter(this,'fi-mcap')">
+        <span class="filter-label">总市值</span>
+        <div class="filter-controls">
+          <input type="number" id="mcap_min" value="100" min="0">
+          <span class="filter-sep">~</span>
+          <input type="number" id="mcap_max" value="5000" min="0">
+          <select id="mcap_unit"><option value="亿">亿</option><option value="万">万</option></select>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== 财务健康 ===== -->
+    <div class="section-title">财务健康</div>
+    <div class="filters">
+
+      <div class="filter-item active" id="fi-goodwill">
+        <input type="checkbox" id="goodwill_enabled" checked onchange="toggleFilter(this,'fi-goodwill')">
         <span class="filter-label">商誉</span>
         <div class="filter-controls">
           <select id="goodwill_op"><option value="小于"><</option><option value="大于">></option></select>
           <input type="number" id="goodwill_val" value="10" min="0">
-          <select id="goodwill_unit">
-            <option value="亿">亿</option>
-            <option value="万">万</option>
+          <select id="goodwill_unit"><option value="亿">亿</option><option value="万">万</option></select>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-debt-ratio">
+        <input type="checkbox" id="debt_ratio_enabled" onchange="toggleFilter(this,'fi-debt-ratio')">
+        <span class="filter-label">资产负债率</span>
+        <div class="filter-controls">
+          <input type="number" id="debt_ratio_min" value="0" min="0" step="5">
+          <span class="filter-sep">~</span>
+          <input type="number" id="debt_ratio_max" value="60" min="0" step="5">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-current-ratio">
+        <input type="checkbox" id="current_ratio_enabled" onchange="toggleFilter(this,'fi-current-ratio')">
+        <span class="filter-label">流动比率</span>
+        <div class="filter-controls">
+          <select id="current_ratio_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="current_ratio_val" value="1.5" step="0.1">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== 市场表现 ===== -->
+    <div class="section-title">市场表现</div>
+    <div class="filters">
+
+      <div class="filter-item" id="fi-industry">
+        <input type="checkbox" id="industry_enabled" onchange="toggleFilter(this,'fi-industry')">
+        <span class="filter-label">所属行业</span>
+        <div class="filter-controls">
+          <input type="text" id="industry_val" placeholder="如：半导体、白酒" style="width:160px;">
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-listing-years">
+        <input type="checkbox" id="listing_years_enabled" onchange="toggleFilter(this,'fi-listing-years')">
+        <span class="filter-label">上市年限</span>
+        <div class="filter-controls">
+          <select id="listing_years_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="listing_years_val" value="3" min="0" step="1">
+          <span class="filter-unit">年</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-pct-change">
+        <input type="checkbox" id="pct_change_enabled" onchange="toggleFilter(this,'fi-pct-change')">
+        <span class="filter-label">区间涨跌幅</span>
+        <div class="filter-controls">
+          <select id="pct_change_period">
+            <option value="近一周">近一周</option>
+            <option value="近一个月" selected>近一月</option>
+            <option value="近三个月">近三月</option>
+            <option value="近半年">近半年</option>
+            <option value="近一年">近一年</option>
           </select>
+          <select id="pct_change_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="pct_change_val" value="5" step="1">
+          <span class="filter-unit">%</span>
+        </div>
+      </div>
+
+      <div class="filter-item" id="fi-turnover">
+        <input type="checkbox" id="turnover_enabled" onchange="toggleFilter(this,'fi-turnover')">
+        <span class="filter-label">换手率</span>
+        <div class="filter-controls">
+          <select id="turnover_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="turnover_val" value="1" step="0.5">
+          <span class="filter-unit">%</span>
         </div>
       </div>
 
     </div>
 
     <!-- 自定义条件 -->
-    <div class="custom-row">
+    <div class="custom-row" style="margin-top:20px;">
       <span class="filter-label">自定义条件</span>
-      <input type="text" id="custom" placeholder="例如：所属行业为半导体、连续3年扣非净利润增长率大于20%">
+      <input type="text" id="custom" placeholder="例如：连续3年扣非净利润增长率大于20%、市盈率历史百分位低于30%">
     </div>
 
-    <!-- 查询预览 -->
     <div class="query-preview" id="queryPreview">点击"开始筛选"查看查询语句</div>
 
-    <!-- 操作按钮 -->
     <div class="actions">
       <button class="btn btn-primary" id="btnSearch" onclick="doSearch()">开始筛选</button>
       <button class="btn btn-secondary" onclick="resetFilters()">重置条件</button>
     </div>
   </div>
 
-  <!-- 结果 -->
   <div class="panel" id="resultPanel" style="display:none;">
     <div class="result-info">
       <div class="panel-title">筛选结果</div>
@@ -400,16 +552,12 @@
     </div>
   </div>
 
-  <!-- 加载中 -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <div>正在查询同花顺问财，请稍候...</div>
   </div>
 
-  <!-- 空结果 -->
   <div class="empty" id="emptyMsg" style="display:none;">没有符合条件的股票，试试放宽条件？</div>
-
-  <!-- 错误 -->
   <div id="errorMsg" style="display:none;"></div>
 </div>
 
@@ -420,38 +568,73 @@ function toggleFilter(cb, id) {
   document.getElementById(id).classList.toggle('active', cb.checked);
 }
 
-// 初始化active状态
-document.querySelectorAll('.filter-item input[type="checkbox"]').forEach(cb => {
-  if (cb.checked) cb.closest('.filter-item').classList.add('active');
-});
+function val(id) { return document.getElementById(id).value; }
+function chk(id) { return document.getElementById(id).checked; }
 
 function buildPayload() {
   return {
-    revenue_enabled: document.getElementById('revenue_enabled').checked,
-    revenue_op: document.getElementById('revenue_op').value,
-    revenue_val: document.getElementById('revenue_val').value,
-    revenue_unit: document.getElementById('revenue_unit').value,
+    revenue_enabled: chk('revenue_enabled'),
+    revenue_op: val('revenue_op'), revenue_val: val('revenue_val'), revenue_unit: val('revenue_unit'),
 
-    profit_enabled: document.getElementById('profit_enabled').checked,
-    profit_op: document.getElementById('profit_op').value,
-    profit_val: document.getElementById('profit_val').value,
-    profit_unit: document.getElementById('profit_unit').value,
+    revenue_growth_enabled: chk('revenue_growth_enabled'),
+    revenue_growth_op: val('revenue_growth_op'), revenue_growth_val: val('revenue_growth_val'),
 
-    cashflow_enabled: document.getElementById('cashflow_enabled').checked,
-    cashflow_type: document.getElementById('cashflow_type').value,
+    profit_enabled: chk('profit_enabled'),
+    profit_op: val('profit_op'), profit_val: val('profit_val'), profit_unit: val('profit_unit'),
 
-    pe_enabled: document.getElementById('pe_enabled').checked,
-    pe_min: document.getElementById('pe_min').value,
-    pe_max: document.getElementById('pe_max').value,
+    profit_growth_enabled: chk('profit_growth_enabled'),
+    profit_growth_op: val('profit_growth_op'), profit_growth_val: val('profit_growth_val'),
 
-    pb_enabled: document.getElementById('pb_enabled').checked,
-    pb_min: document.getElementById('pb_min').value,
-    pb_max: document.getElementById('pb_max').value,
+    gross_margin_enabled: chk('gross_margin_enabled'),
+    gross_margin_min: val('gross_margin_min'), gross_margin_max: val('gross_margin_max'),
 
-    goodwill_enabled: document.getElementById('goodwill_enabled').checked,
-    goodwill_op: document.getElementById('goodwill_op').value,
-    goodwill_val: document.getElementById('goodwill_val').value,
-    goodwill_unit: document.getElementById('goodwill_unit').value,
+    net_margin_enabled: chk('net_margin_enabled'),
+    net_margin_min: val('net_margin_min'), net_margin_max: val('net_margin_max'),
+
+    roe_enabled: chk('roe_enabled'),
+    roe_min: val('roe_min'), roe_max: val('roe_max'),
+
+    eps_enabled: chk('eps_enabled'),
+    eps_op: val('eps_op'), eps_val: val('eps_val'),
+
+    cashflow_enabled: chk('cashflow_enabled'),
+    cashflow_type: val('cashflow_type'),
+
+    pe_enabled: chk('pe_enabled'),
+    pe_min: val('pe_min'), pe_max: val('pe_max'),
+
+    pb_enabled: chk('pb_enabled'),
+    pb_min: val('pb_min'), pb_max: val('pb_max'),
+
+    ps_enabled: chk('ps_enabled'),
+    ps_min: val('ps_min'), ps_max: val('ps_max'),
+
+    dividend_enabled: chk('dividend_enabled'),
+    dividend_op: val('dividend_op'), dividend_val: val('dividend_val'),
+
+    mcap_enabled: chk('mcap_enabled'),
+    mcap_min: val('mcap_min'), mcap_max: val('mcap_max'), mcap_unit: val('mcap_unit'),
+
+    goodwill_enabled: chk('goodwill_enabled'),
+    goodwill_op: val('goodwill_op'), goodwill_val: val('goodwill_val'), goodwill_unit: val('goodwill_unit'),
+
+    debt_ratio_enabled: chk('debt_ratio_enabled'),
+    debt_ratio_min: val('debt_ratio_min'), debt_ratio_max: val('debt_ratio_max'),
+
+    current_ratio_enabled: chk('current_ratio_enabled'),
+    current_ratio_op: val('current_ratio_op'), current_ratio_val: val('current_ratio_val'),
+
+    industry_enabled: chk('industry_enabled'),
+    industry_val: val('industry_val'),
+
+    listing_years_enabled: chk('listing_years_enabled'),
+    listing_years_op: val('listing_years_op'), listing_years_val: val('listing_years_val'),
+
+    pct_change_enabled: chk('pct_change_enabled'),
+    pct_change_period: val('pct_change_period'), pct_change_op: val('pct_change_op'), pct_change_val: val('pct_change_val'),
+
+    turnover_enabled: chk('turnover_enabled'),
+    turnover_op: val('turnover_op'), turnover_val: val('turnover_val'),
 
     custom: document.getElementById('custom').value.trim(),
   };
@@ -477,12 +660,8 @@ async function doSearch() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildPayload()),
     });
-
     const json = await resp.json();
-
-    if (!resp.ok) {
-      throw new Error(json.error || '请求失败');
-    }
+    if (!resp.ok) throw new Error(json.error || '请求失败');
 
     document.getElementById('queryPreview').textContent = '查询语句：' + json.query;
 
@@ -496,7 +675,6 @@ async function doSearch() {
     renderTable(json.columns, json.data);
     document.getElementById('totalCount').textContent = json.total;
     resultPanel.style.display = 'block';
-
   } catch (e) {
     errorMsg.innerHTML = '<div class="error-msg">' + e.message + '</div>';
     errorMsg.style.display = 'block';
@@ -510,7 +688,6 @@ async function doSearch() {
 function renderTable(columns, data) {
   const head = document.getElementById('tableHead');
   const body = document.getElementById('tableBody');
-
   head.innerHTML = '<tr>' + columns.map(c => `<th>${c}</th>`).join('') + '</tr>';
   body.innerHTML = data.map(row =>
     '<tr>' + row.map(cell => {
@@ -547,42 +724,47 @@ function exportCSV() {
 }
 
 function resetFilters() {
-  document.getElementById('revenue_enabled').checked = true;
-  document.getElementById('revenue_op').value = '大于';
-  document.getElementById('revenue_val').value = '50';
-  document.getElementById('revenue_unit').value = '亿';
-
-  document.getElementById('profit_enabled').checked = true;
-  document.getElementById('profit_op').value = '大于';
-  document.getElementById('profit_val').value = '5';
-  document.getElementById('profit_unit').value = '亿';
-
-  document.getElementById('cashflow_enabled').checked = true;
-  document.getElementById('cashflow_type').value = '为正';
-
-  document.getElementById('pe_enabled').checked = true;
-  document.getElementById('pe_min').value = '0';
-  document.getElementById('pe_max').value = '25';
-
-  document.getElementById('pb_enabled').checked = true;
-  document.getElementById('pb_min').value = '0';
-  document.getElementById('pb_max').value = '3';
-
-  document.getElementById('goodwill_enabled').checked = true;
-  document.getElementById('goodwill_op').value = '小于';
-  document.getElementById('goodwill_val').value = '10';
-  document.getElementById('goodwill_unit').value = '亿';
-
-  document.getElementById('custom').value = '';
-
-  document.querySelectorAll('.filter-item input[type="checkbox"]').forEach(cb => {
-    cb.closest('.filter-item').classList.toggle('active', cb.checked);
+  document.querySelectorAll('.filter-item input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+  // 默认开启的
+  ['revenue_enabled','profit_enabled','cashflow_enabled','pe_enabled','pb_enabled','goodwill_enabled'].forEach(id => {
+    document.getElementById(id).checked = true;
   });
-
+  // 恢复默认值
+  const defaults = {
+    revenue_op:'大于', revenue_val:'50', revenue_unit:'亿',
+    revenue_growth_op:'大于', revenue_growth_val:'10',
+    profit_op:'大于', profit_val:'5', profit_unit:'亿',
+    profit_growth_op:'大于', profit_growth_val:'10',
+    gross_margin_min:'30', gross_margin_max:'100',
+    net_margin_min:'10', net_margin_max:'100',
+    roe_min:'10', roe_max:'100',
+    eps_op:'大于', eps_val:'1',
+    cashflow_type:'为正',
+    pe_min:'0', pe_max:'25',
+    pb_min:'0', pb_max:'3',
+    ps_min:'0', ps_max:'10',
+    dividend_op:'大于', dividend_val:'3',
+    mcap_min:'100', mcap_max:'5000', mcap_unit:'亿',
+    goodwill_op:'小于', goodwill_val:'10', goodwill_unit:'亿',
+    debt_ratio_min:'0', debt_ratio_max:'60',
+    current_ratio_op:'大于', current_ratio_val:'1.5',
+    industry_val:'',
+    listing_years_op:'大于', listing_years_val:'3',
+    pct_change_period:'近一个月', pct_change_op:'大于', pct_change_val:'5',
+    turnover_op:'大于', turnover_val:'1',
+  };
+  for (const [k,v] of Object.entries(defaults)) {
+    const el = document.getElementById(k);
+    if (el) el.value = v;
+  }
+  document.getElementById('custom').value = '';
+  document.querySelectorAll('.filter-item').forEach(fi => {
+    const cb = fi.querySelector('input[type="checkbox"]');
+    fi.classList.toggle('active', cb && cb.checked);
+  });
   document.getElementById('queryPreview').textContent = '点击"开始筛选"查看查询语句';
 }
 
-// 回车触发搜索
 document.getElementById('custom').addEventListener('keydown', e => {
   if (e.key === 'Enter') doSearch();
 });
