@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A股选股器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0a0a0a;
+    color: #e0d5c1;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0f0f0f, #1a1408);
+    border-bottom: 1px solid #2a2010;
+    color: #fff;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #d4a843, #f5d485, #c9952a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+  .header .sub { font-size: 13px; color: #8a7a5a; margin-top: 4px; letter-spacing: 1px; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* 筛选面板 */
+  .panel {
+    background: linear-gradient(145deg, #131210, #1a1710);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,168,67,0.08);
+    margin-bottom: 20px;
+    border: 1px solid #2a2010;
+  }
+  .panel-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #d4a843;
+    border-left: 3px solid #d4a843;
+    padding-left: 10px;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 16px;
+  }
+
+  .filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #111;
+    border-radius: 8px;
+    border: 1px solid #252015;
+    transition: all 0.2s;
+  }
+  .filter-item:hover { border-color: #3a3020; background: #161410; }
+  .filter-item.active {
+    border-color: #d4a843;
+    background: linear-gradient(145deg, #1a1508, #1e1a0e);
+    box-shadow: 0 0 12px rgba(212,168,67,0.08);
+  }
+
+  .filter-item input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: #d4a843;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .filter-label {
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 90px;
+    flex-shrink: 0;
+    color: #c9b88a;
+  }
+
+  .filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+
+  .filter-controls select,
+  .filter-controls input[type="number"],
+  .filter-controls input[type="text"] {
+    padding: 6px 10px;
+    border: 1px solid #2a2010;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #0e0e0c;
+    color: #e0d5c1;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-controls select:focus,
+  .filter-controls input:focus { border-color: #d4a843; box-shadow: 0 0 6px rgba(212,168,67,0.15); }
+
+  .filter-controls input[type="number"] { width: 80px; }
+  .filter-controls input[type="text"] { width: 100%; }
+  .filter-controls select { min-width: 60px; }
+
+  .filter-sep { color: #5a4a30; font-size: 13px; }
+
+  /* 自定义条件 */
+  .custom-row {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .custom-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #2a2010;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: #0e0e0c;
+    color: #e0d5c1;
+  }
+  .custom-row input::placeholder { color: #5a4a30; }
+  .custom-row input:focus { border-color: #d4a843; box-shadow: 0 0 6px rgba(212,168,67,0.15); }
+
+  /* 按钮 */
+  .actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #c9952a, #d4a843, #e8c35a);
+    color: #0a0a0a;
+    font-weight: 600;
+    box-shadow: 0 2px 12px rgba(212,168,67,0.25);
+  }
+  .btn-primary:hover { background: linear-gradient(135deg, #d4a843, #e8c35a, #f5d485); box-shadow: 0 4px 20px rgba(212,168,67,0.35); }
+  .btn-primary:disabled { background: #3a3020; color: #5a4a30; cursor: not-allowed; box-shadow: none; }
+  .btn-secondary {
+    background: #1a1710;
+    color: #c9b88a;
+    border: 1px solid #2a2010;
+  }
+  .btn-secondary:hover { background: #252015; border-color: #3a3020; }
+
+  .query-preview {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #0e0e0c;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #5a4a30;
+    font-family: monospace;
+    word-break: break-all;
+    border: 1px solid #1a1508;
+  }
+
+  /* 结果 */
+  .result-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .result-count {
+    font-size: 14px;
+    color: #8a7a5a;
+  }
+  .result-count strong { color: #d4a843; font-size: 18px; }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #2a2010;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  thead th {
+    background: #161410;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #d4a843;
+    border-bottom: 2px solid #2a2010;
+    position: sticky;
+    top: 0;
+  }
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #1a1508;
+    color: #c9b88a;
+  }
+  tbody tr:hover { background: #1a1710; }
+  tbody tr:nth-child(even) { background: #0f0e0c; }
+  tbody tr:nth-child(even):hover { background: #1a1710; }
+
+  /* 加载 */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: #8a7a5a;
+  }
+  .loading.show { display: block; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #2a2010;
+    border-top-color: #d4a843;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #5a4a30;
+    font-size: 15px;
+  }
+
+  .error-msg {
+    padding: 14px 18px;
+    background: #1a0f0f;
+    color: #e65a5a;
+    border-radius: 8px;
+    border: 1px solid #3a1515;
+    font-size: 14px;
+  }
+
+  .export-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+  }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #2a2010; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3020; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>A股选股器</h1>
+    <div class="sub">基于同花顺问财 · 实时数据</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 筛选条件 -->
+  <div class="panel">
+    <div class="panel-title">筛选条件</div>
+    <div class="filters">
+
+      <!-- 营业总收入 -->
+      <div class="filter-item" id="fi-revenue">
+        <input type="checkbox" id="revenue_enabled" checked onchange="toggleFilter(this, 'fi-revenue')">
+        <span class="filter-label">营业总收入</span>
+        <div class="filter-controls">
+          <select id="revenue_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="revenue_val" value="50" min="0">
+          <select id="revenue_unit">
+            <option value="亿">亿</option>
+            <option value="万">万</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 扣非净利润 -->
+      <div class="filter-item" id="fi-profit">
+        <input type="checkbox" id="profit_enabled" checked onchange="toggleFilter(this, 'fi-profit')">
+        <span class="filter-label">扣非净利润</span>
+        <div class="filter-controls">
+          <select id="profit_op"><option value="大于">></option><option value="小于"><</option></select>
+          <input type="number" id="profit_val" value="5" min="0">
+          <select id="profit_unit">
+            <option value="亿">亿</option>
+            <option value="万">万</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 经营现金流 -->
+      <div class="filter-item" id="fi-cashflow">
+        <input type="checkbox" id="cashflow_enabled" checked onchange="toggleFilter(this, 'fi-cashflow')">
+        <span class="filter-label">经营现金流</span>
+        <div class="filter-controls">
+          <select id="cashflow_type">
+            <option value="为正">为正</option>
+            <option value="为负">为负</option>
+            <option value="大于10亿">> 10亿</option>
+            <option value="大于50亿">> 50亿</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 市盈率 -->
+      <div class="filter-item" id="fi-pe">
+        <input type="checkbox" id="pe_enabled" checked onchange="toggleFilter(this, 'fi-pe')">
+        <span class="filter-label">市盈率 (PE)</span>
+        <div class="filter-controls">
+          <input type="number" id="pe_min" value="0" min="0" step="1">
+          <span class="filter-sep">~</span>
+          <input type="number" id="pe_max" value="25" min="0" step="1">
+        </div>
+      </div>
+
+      <!-- 市净率 -->
+      <div class="filter-item" id="fi-pb">
+        <input type="checkbox" id="pb_enabled" checked onchange="toggleFilter(this, 'fi-pb')">
+        <span class="filter-label">市净率 (PB)</span>
+        <div class="filter-controls">
+          <input type="number" id="pb_min" value="0" min="0" step="0.1">
+          <span class="filter-sep">~</span>
+          <input type="number" id="pb_max" value="3" min="0" step="0.1">
+        </div>
+      </div>
+
+      <!-- 商誉 -->
+      <div class="filter-item" id="fi-goodwill">
+        <input type="checkbox" id="goodwill_enabled" checked onchange="toggleFilter(this, 'fi-goodwill')">
+        <span class="filter-label">商誉</span>
+        <div class="filter-controls">
+          <select id="goodwill_op"><option value="小于"><</option><option value="大于">></option></select>
+          <input type="number" id="goodwill_val" value="10" min="0">
+          <select id="goodwill_unit">
+            <option value="亿">亿</option>
+            <option value="万">万</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 自定义条件 -->
+    <div class="custom-row">
+      <span class="filter-label">自定义条件</span>
+      <input type="text" id="custom" placeholder="例如：所属行业为半导体、连续3年扣非净利润增长率大于20%">
+    </div>
+
+    <!-- 查询预览 -->
+    <div class="query-preview" id="queryPreview">点击"开始筛选"查看查询语句</div>
+
+    <!-- 操作按钮 -->
+    <div class="actions">
+      <button class="btn btn-primary" id="btnSearch" onclick="doSearch()">开始筛选</button>
+      <button class="btn btn-secondary" onclick="resetFilters()">重置条件</button>
+    </div>
+  </div>
+
+  <!-- 结果 -->
+  <div class="panel" id="resultPanel" style="display:none;">
+    <div class="result-info">
+      <div class="panel-title">筛选结果</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="result-count">共 <strong id="totalCount">0</strong> 只</span>
+        <button class="btn btn-secondary export-btn" onclick="exportCSV()">导出 CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 加载中 -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>正在查询同花顺问财，请稍候...</div>
+  </div>
+
+  <!-- 空结果 -->
+  <div class="empty" id="emptyMsg" style="display:none;">没有符合条件的股票，试试放宽条件？</div>
+
+  <!-- 错误 -->
+  <div id="errorMsg" style="display:none;"></div>
+</div>
+
+<script>
+let lastResult = null;
+
+function toggleFilter(cb, id) {
+  document.getElementById(id).classList.toggle('active', cb.checked);
+}
+
+// 初始化active状态
+document.querySelectorAll('.filter-item input[type="checkbox"]').forEach(cb => {
+  if (cb.checked) cb.closest('.filter-item').classList.add('active');
+});
+
+function buildPayload() {
+  return {
+    revenue_enabled: document.getElementById('revenue_enabled').checked,
+    revenue_op: document.getElementById('revenue_op').value,
+    revenue_val: document.getElementById('revenue_val').value,
+    revenue_unit: document.getElementById('revenue_unit').value,
+
+    profit_enabled: document.getElementById('profit_enabled').checked,
+    profit_op: document.getElementById('profit_op').value,
+    profit_val: document.getElementById('profit_val').value,
+    profit_unit: document.getElementById('profit_unit').value,
+
+    cashflow_enabled: document.getElementById('cashflow_enabled').checked,
+    cashflow_type: document.getElementById('cashflow_type').value,
+
+    pe_enabled: document.getElementById('pe_enabled').checked,
+    pe_min: document.getElementById('pe_min').value,
+    pe_max: document.getElementById('pe_max').value,
+
+    pb_enabled: document.getElementById('pb_enabled').checked,
+    pb_min: document.getElementById('pb_min').value,
+    pb_max: document.getElementById('pb_max').value,
+
+    goodwill_enabled: document.getElementById('goodwill_enabled').checked,
+    goodwill_op: document.getElementById('goodwill_op').value,
+    goodwill_val: document.getElementById('goodwill_val').value,
+    goodwill_unit: document.getElementById('goodwill_unit').value,
+
+    custom: document.getElementById('custom').value.trim(),
+  };
+}
+
+async function doSearch() {
+  const btn = document.getElementById('btnSearch');
+  const loading = document.getElementById('loading');
+  const resultPanel = document.getElementById('resultPanel');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const errorMsg = document.getElementById('errorMsg');
+
+  btn.disabled = true;
+  btn.textContent = '查询中...';
+  loading.classList.add('show');
+  resultPanel.style.display = 'none';
+  emptyMsg.style.display = 'none';
+  errorMsg.style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/screen', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildPayload()),
+    });
+
+    const json = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(json.error || '请求失败');
+    }
+
+    document.getElementById('queryPreview').textContent = '查询语句：' + json.query;
+
+    if (json.total === 0) {
+      emptyMsg.style.display = 'block';
+      lastResult = null;
+      return;
+    }
+
+    lastResult = json;
+    renderTable(json.columns, json.data);
+    document.getElementById('totalCount').textContent = json.total;
+    resultPanel.style.display = 'block';
+
+  } catch (e) {
+    errorMsg.innerHTML = '<div class="error-msg">' + e.message + '</div>';
+    errorMsg.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '开始筛选';
+    loading.classList.remove('show');
+  }
+}
+
+function renderTable(columns, data) {
+  const head = document.getElementById('tableHead');
+  const body = document.getElementById('tableBody');
+
+  head.innerHTML = '<tr>' + columns.map(c => `<th>${c}</th>`).join('') + '</tr>';
+  body.innerHTML = data.map(row =>
+    '<tr>' + row.map(cell => {
+      if (cell === null || cell === undefined) return '<td>-</td>';
+      if (typeof cell === 'number') {
+        if (Math.abs(cell) >= 1e8) return `<td>${(cell / 1e8).toFixed(2)}亿</td>`;
+        if (Math.abs(cell) >= 1e4) return `<td>${(cell / 1e4).toFixed(2)}万</td>`;
+        if (Number.isInteger(cell)) return `<td>${cell}</td>`;
+        return `<td>${cell.toFixed(2)}</td>`;
+      }
+      return `<td>${cell}</td>`;
+    }).join('') + '</tr>'
+  ).join('');
+}
+
+function exportCSV() {
+  if (!lastResult) return;
+  const { columns, data } = lastResult;
+  let csv = '\uFEFF' + columns.join(',') + '\n';
+  data.forEach(row => {
+    csv += row.map(cell => {
+      if (cell === null || cell === undefined) return '';
+      const s = String(cell);
+      if (s.includes(',') || s.includes('"') || s.includes('\n'))
+        return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'stock_result.csv';
+  a.click();
+}
+
+function resetFilters() {
+  document.getElementById('revenue_enabled').checked = true;
+  document.getElementById('revenue_op').value = '大于';
+  document.getElementById('revenue_val').value = '50';
+  document.getElementById('revenue_unit').value = '亿';
+
+  document.getElementById('profit_enabled').checked = true;
+  document.getElementById('profit_op').value = '大于';
+  document.getElementById('profit_val').value = '5';
+  document.getElementById('profit_unit').value = '亿';
+
+  document.getElementById('cashflow_enabled').checked = true;
+  document.getElementById('cashflow_type').value = '为正';
+
+  document.getElementById('pe_enabled').checked = true;
+  document.getElementById('pe_min').value = '0';
+  document.getElementById('pe_max').value = '25';
+
+  document.getElementById('pb_enabled').checked = true;
+  document.getElementById('pb_min').value = '0';
+  document.getElementById('pb_max').value = '3';
+
+  document.getElementById('goodwill_enabled').checked = true;
+  document.getElementById('goodwill_op').value = '小于';
+  document.getElementById('goodwill_val').value = '10';
+  document.getElementById('goodwill_unit').value = '亿';
+
+  document.getElementById('custom').value = '';
+
+  document.querySelectorAll('.filter-item input[type="checkbox"]').forEach(cb => {
+    cb.closest('.filter-item').classList.toggle('active', cb.checked);
+  });
+
+  document.getElementById('queryPreview').textContent = '点击"开始筛选"查看查询语句';
+}
+
+// 回车触发搜索
+document.getElementById('custom').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
