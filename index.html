@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A股选股器</title>
+<title>超级无敌筛选赚钱大神器</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -220,11 +220,37 @@
     position: sticky;
     top: 0;
     z-index: 1;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
   }
+  thead th:hover { background: #1e1a10; }
+  thead th .sort-arrow { font-size: 11px; margin-left: 4px; color: #5a4a30; }
+  thead th.sort-asc .sort-arrow, thead th.sort-desc .sort-arrow { color: #d4a843; }
   tbody td { padding: 9px 14px; border-bottom: 1px solid #1a1508; color: #c9b88a; }
+  tbody td.col-name { color: #e0d5c1; font-weight: 600; }
+  tbody td.col-code { color: #8a7a5a; font-family: monospace; font-size: 12px; }
+  tbody td.num-up { color: #e65a5a; font-weight: 500; }
+  tbody td.num-down { color: #4ecb71; font-weight: 500; }
+  tbody td.num-gold { color: #d4a843; }
+  tbody td .bar-wrap {
+    display: flex; align-items: center; gap: 6px;
+  }
+  tbody td .bar {
+    height: 6px; border-radius: 3px; min-width: 2px; max-width: 80px;
+  }
+  tbody td .bar.bar-red { background: linear-gradient(90deg, #e65a5a, #e65a5a88); }
+  tbody td .bar.bar-green { background: linear-gradient(90deg, #4ecb71, #4ecb7188); }
+  tbody td .bar.bar-gold { background: linear-gradient(90deg, #d4a843, #d4a84388); }
+  tbody td .tag {
+    display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+  }
+  tbody td .tag-up { background: rgba(230,90,90,0.12); color: #e65a5a; }
+  tbody td .tag-down { background: rgba(78,203,113,0.12); color: #4ecb71; }
   tbody tr:hover { background: #1a1710; }
   tbody tr:nth-child(even) { background: #0f0e0c; }
   tbody tr:nth-child(even):hover { background: #1a1710; }
+  tbody tr { transition: background 0.15s; }
 
   .loading { display: none; text-align: center; padding: 60px 20px; color: #8a7a5a; }
   .loading.show { display: block; }
@@ -251,6 +277,117 @@
 
   .export-btn { padding: 6px 16px; font-size: 13px; }
 
+  /* AI推荐板块 */
+  .ai-section { margin-bottom: 20px; }
+  .ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .ai-header .panel-title { margin-bottom: 0; }
+  .ai-refresh {
+    padding: 6px 18px;
+    border: 1px solid #2a2010;
+    border-radius: 6px;
+    background: #1a1710;
+    color: #d4a843;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ai-refresh:hover { background: #252015; border-color: #d4a843; }
+  .ai-refresh:disabled { color: #5a4a30; cursor: not-allowed; }
+
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1200px) { .ai-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) { .ai-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .ai-card {
+    background: linear-gradient(145deg, #161410, #1a1710);
+    border: 1px solid #252015;
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ai-card:hover {
+    border-color: #d4a843;
+    box-shadow: 0 0 20px rgba(212,168,67,0.12);
+    transform: translateY(-2px);
+  }
+  .ai-card .rank {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 11px;
+    color: #5a4a30;
+    font-weight: 700;
+  }
+  .ai-card .stock-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e0d5c1;
+    margin-bottom: 2px;
+  }
+  .ai-card .stock-code {
+    font-size: 11px;
+    color: #5a4a30;
+    margin-bottom: 10px;
+  }
+  .ai-card .stock-price {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .ai-card .stock-price.up { color: #e65a5a; }
+  .ai-card .stock-price.down { color: #4ecb71; }
+  .ai-card .stock-change {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .ai-card .stock-change.up { color: #e65a5a; }
+  .ai-card .stock-change.down { color: #4ecb71; }
+  .ai-card .stock-reason {
+    font-size: 12px;
+    color: #8a7a5a;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .ai-card .stock-signal {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .ai-card .stock-signal.bullish { background: rgba(230,90,90,0.15); color: #e65a5a; }
+  .ai-card .stock-signal.neutral { background: rgba(212,168,67,0.15); color: #d4a843; }
+  .ai-card .stock-signal.cautious { background: rgba(78,203,113,0.15); color: #4ecb71; }
+
+  .ai-loading {
+    text-align: center;
+    padding: 40px;
+    color: #5a4a30;
+  }
+  .ai-loading .spinner {
+    width: 28px; height: 28px;
+    border-width: 2px;
+    margin: 0 auto 12px;
+  }
+  .ai-error {
+    text-align: center;
+    padding: 30px;
+    color: #e65a5a;
+    font-size: 13px;
+  }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #0a0a0a; }
   ::-webkit-scrollbar-thumb { background: #2a2010; border-radius: 3px; }
@@ -261,12 +398,27 @@
 
 <div class="header">
   <div>
-    <h1>A股选股器</h1>
-    <div class="sub">基于同花顺问财 · 实时数据</div>
+    <h1>超级无敌筛选赚钱大神器</h1>
+    <div class="sub">CC匠心之作</div>
   </div>
 </div>
 
 <div class="container">
+  <!-- AI 每日推荐 -->
+  <div class="panel ai-section">
+    <div class="ai-header">
+      <div class="panel-title">CC今日推荐</div>
+      <div style="font-size:12px;color:#5a4a30;margin-left:12px;flex:1;">注：不要信、不一定准、亏钱不要找我、和我没关系</div>
+      <button class="ai-refresh" id="aiRefreshBtn" onclick="loadAIRecommend()">刷新推荐</button>
+    </div>
+    <div id="aiContent">
+      <div class="ai-loading">
+        <div class="spinner"></div>
+        <div>正在查，别急，AI分析的，查一次1分钱，别一直刷新，会刷坏的</div>
+      </div>
+    </div>
+  </div>
+
   <div class="panel">
     <div class="panel-title">筛选条件</div>
 
@@ -554,7 +706,7 @@
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
-    <div>正在查询同花顺问财，请稍候...</div>
+    <div>让我看看哪个玩意能赚钱...</div>
   </div>
 
   <div class="empty" id="emptyMsg" style="display:none;">没有符合条件的股票，试试放宽条件？</div>
@@ -685,22 +837,103 @@ async function doSearch() {
   }
 }
 
+let sortCol = -1;
+let sortAsc = true;
+
+// 判断列类型
+function colType(name) {
+  const n = name.toLowerCase();
+  if (n.includes('代码') || n === '代码') return 'code';
+  if (n.includes('名称') || n.includes('简称') || n === '名称') return 'name';
+  if (n.includes('涨跌') || n.includes('增长')) return 'change';
+  if (n.includes('pe') || n.includes('pb') || n.includes('ps') || n.includes('市盈') || n.includes('市净') || n.includes('市销')) return 'valuation';
+  if (n.includes('市值') || n.includes('收入') || n.includes('营收') || n.includes('利润') || n.includes('现金') || n.includes('商誉') || n.includes('损益')) return 'money';
+  if (n.includes('最新价') || n.includes('价')) return 'price';
+  return 'default';
+}
+
+function fmtMoney(v) {
+  if (v === null || v === undefined) return '-';
+  const abs = Math.abs(v);
+  if (abs >= 1e8) return (v / 1e8).toFixed(2) + '亿';
+  if (abs >= 1e4) return (v / 1e4).toFixed(2) + '万';
+  return v.toFixed(2);
+}
+
+function renderCell(cell, type) {
+  if (cell === null || cell === undefined) return '<td>-</td>';
+
+  if (type === 'code') {
+    return `<td class="col-code">${cell}</td>`;
+  }
+  if (type === 'name') {
+    return `<td class="col-name">${cell}</td>`;
+  }
+  if (type === 'change' && typeof cell === 'number') {
+    const cls = cell > 0 ? 'num-up' : cell < 0 ? 'num-down' : '';
+    const sign = cell > 0 ? '+' : '';
+    const tagCls = cell > 0 ? 'tag-up' : 'tag-down';
+    return `<td class="${cls}" data-v="${cell}"><span class="tag ${tagCls}">${sign}${cell.toFixed(2)}%</span></td>`;
+  }
+  if (type === 'money' && typeof cell === 'number') {
+    const cls = cell > 0 ? 'num-gold' : cell < 0 ? 'num-down' : '';
+    return `<td class="${cls}" data-v="${cell}">${fmtMoney(cell)}</td>`;
+  }
+  if (type === 'valuation' && typeof cell === 'number') {
+    return `<td class="num-gold" data-v="${cell}">${cell.toFixed(2)}</td>`;
+  }
+  if (type === 'price' && typeof cell === 'number') {
+    return `<td style="color:#e0d5c1;font-weight:600;" data-v="${cell}">${cell.toFixed(2)}</td>`;
+  }
+  if (typeof cell === 'number') {
+    const abs = Math.abs(cell);
+    if (abs >= 1e8) return `<td data-v="${cell}">${(cell / 1e8).toFixed(2)}亿</td>`;
+    if (abs >= 1e4) return `<td data-v="${cell}">${(cell / 1e4).toFixed(2)}万</td>`;
+    return `<td data-v="${cell}">${cell.toFixed(2)}</td>`;
+  }
+  return `<td>${cell}</td>`;
+}
+
 function renderTable(columns, data) {
   const head = document.getElementById('tableHead');
   const body = document.getElementById('tableBody');
-  head.innerHTML = '<tr>' + columns.map(c => `<th>${c}</th>`).join('') + '</tr>';
-  body.innerHTML = data.map(row =>
-    '<tr>' + row.map(cell => {
-      if (cell === null || cell === undefined) return '<td>-</td>';
-      if (typeof cell === 'number') {
-        if (Math.abs(cell) >= 1e8) return `<td>${(cell / 1e8).toFixed(2)}亿</td>`;
-        if (Math.abs(cell) >= 1e4) return `<td>${(cell / 1e4).toFixed(2)}万</td>`;
-        if (Number.isInteger(cell)) return `<td>${cell}</td>`;
-        return `<td>${cell.toFixed(2)}</td>`;
-      }
-      return `<td>${cell}</td>`;
-    }).join('') + '</tr>'
+  const types = columns.map(colType);
+
+  head.innerHTML = '<tr>' + columns.map((c, i) => {
+    let arrow = '<span class="sort-arrow">\u2195</span>';
+    let cls = '';
+    if (i === sortCol) {
+      arrow = sortAsc ? '<span class="sort-arrow">\u2191</span>' : '<span class="sort-arrow">\u2193</span>';
+      cls = sortAsc ? ' class="sort-asc"' : ' class="sort-desc"';
+    }
+    return `<th${cls} onclick="sortByCol(${i})">${c}${arrow}</th>`;
+  }).join('') + '</tr>';
+
+  body.innerHTML = data.map((row, ri) =>
+    '<tr>' + row.map((cell, ci) => renderCell(cell, types[ci])).join('') + '</tr>'
   ).join('');
+}
+
+function sortByCol(colIdx) {
+  if (!lastResult) return;
+  if (sortCol === colIdx) {
+    sortAsc = !sortAsc;
+  } else {
+    sortCol = colIdx;
+    sortAsc = true;
+  }
+  const data = lastResult.data;
+  data.sort((a, b) => {
+    let va = a[colIdx], vb = b[colIdx];
+    if (va === null || va === undefined) va = sortAsc ? Infinity : -Infinity;
+    if (vb === null || vb === undefined) vb = sortAsc ? Infinity : -Infinity;
+    if (typeof va === 'number' && typeof vb === 'number') {
+      return sortAsc ? va - vb : vb - va;
+    }
+    va = String(va); vb = String(vb);
+    return sortAsc ? va.localeCompare(vb, 'zh') : vb.localeCompare(va, 'zh');
+  });
+  renderTable(lastResult.columns, data);
 }
 
 function exportCSV() {
@@ -768,6 +1001,56 @@ function resetFilters() {
 document.getElementById('custom').addEventListener('keydown', e => {
   if (e.key === 'Enter') doSearch();
 });
+
+// === AI 推荐 ===
+async function loadAIRecommend() {
+  const container = document.getElementById('aiContent');
+  const btn = document.getElementById('aiRefreshBtn');
+  btn.disabled = true;
+  btn.textContent = '分析中...';
+  container.innerHTML = `<div class="ai-loading"><div class="spinner"></div><div>正在查，别急，AI分析的，查一次1分钱，别一直刷新，会刷坏的</div></div>`;
+
+  try {
+    const resp = await fetch('/api/recommend');
+    const json = await resp.json();
+    if (!resp.ok) throw new Error(json.error || '请求失败');
+
+    const stocks = json.stocks;
+    if (!stocks || stocks.length === 0) {
+      container.innerHTML = '<div class="ai-error">暂无推荐数据</div>';
+      return;
+    }
+
+    container.innerHTML = '<div class="ai-grid">' + stocks.map((s, i) => {
+      const changeNum = parseFloat(s.change) || 0;
+      const dir = changeNum >= 0 ? 'up' : 'down';
+      const changeStr = changeNum >= 0 ? `+${changeNum.toFixed(2)}%` : `${changeNum.toFixed(2)}%`;
+
+      let signalCls = 'neutral', signalText = s.signal || '观望';
+      if (signalText.includes('多') || signalText.includes('买')) signalCls = 'bullish';
+      else if (signalText.includes('慎') || signalText.includes('空')) signalCls = 'cautious';
+
+      return `<div class="ai-card">
+        <div class="rank">#${i + 1}</div>
+        <div class="stock-name">${s.name || '-'}</div>
+        <div class="stock-code">${s.code || '-'}</div>
+        <div class="stock-price ${dir}">${s.price || '-'}</div>
+        <div class="stock-change ${dir}">${changeStr}</div>
+        <div class="stock-reason">${s.reason || ''}</div>
+        <span class="stock-signal ${signalCls}">${signalText}</span>
+      </div>`;
+    }).join('') + '</div>';
+
+  } catch (e) {
+    container.innerHTML = `<div class="ai-error">${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '刷新推荐';
+  }
+}
+
+// 页面加载自动请求
+loadAIRecommend();
 </script>
 </body>
 </html>

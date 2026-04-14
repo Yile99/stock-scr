@@ -3,8 +3,12 @@ import pywencai
 import pandas as pd
 import json
 import math
+from openai import OpenAI
 
 app = Flask(__name__)
+
+DEEPSEEK_KEY = "sk-e9b309fc5854489db866aa27c7bdcb07"
+ds_client = OpenAI(api_key=DEEPSEEK_KEY, base_url="https://api.deepseek.com")
 
 
 @app.route("/")
@@ -140,6 +144,7 @@ def screen():
 
     query = " 且 ".join(conditions)
 
+    # 先用筛选条件查，再单独查显示字段
     try:
         result = pywencai.get(query=query)
     except Exception as e:
@@ -160,13 +165,79 @@ def screen():
     if not isinstance(df, pd.DataFrame) or df.empty:
         return jsonify({"query": query, "data": [], "total": 0})
 
+    # 尝试追加更多显示字段（第二次查询）
+    extra_query = (
+        query + "，显示最新价，最新涨跌幅，营业总收入，扣非净利润，"
+        "经营现金流，市盈率，市净率，商誉，市销率，每股净资产，"
+        "营业收入同比增长率，经营现金流除以营业收入，非经常性损益，"
+        "归母净利润，现金净增加额，投资现金流，筹资现金流，"
+        "预测市盈率2026，预测市盈率2027，预测市盈率2028，"
+        "总市值，基本每股收益"
+    )
+    try:
+        extra_result = pywencai.get(query=extra_query)
+        if extra_result is not None:
+            extra_df = extra_result
+            if isinstance(extra_result, dict):
+                for v in extra_result.values():
+                    if isinstance(v, pd.DataFrame):
+                        extra_df = v
+                        break
+            if isinstance(extra_df, pd.DataFrame) and not extra_df.empty:
+                df = extra_df
+    except Exception:
+        pass  # 追加字段失败就用原始结果
+
     df = df.reset_index(drop=True)
+
+    # 简化列名
+    col_rename = {}
+    for c in df.columns:
+        short = c
+        # 去掉日期后缀 [20251231] [20260414] 等
+        import re
+        short = re.sub(r'\[\d{8}\]', '', short).strip()
+        # 常见长名缩短
+        replacements = {
+            '扣除非经常性损益后的净利润': '扣非净利润',
+            '经营活动产生的现金流量净额': '经营现金流',
+            '投资活动产生的现金流量净额': '投资现金流',
+            '筹资活动产生的现金流量净额': '筹资现金流',
+            '经营活动产生的现金流量净额／营业收入': '现金流/营收',
+            '归属于母公司所有者的净利润': '归母净利润',
+            '现金及现金等价物净增加额': '现金净增加',
+            '营业收入(同比增长率)': '营收同比增长',
+            '营业收入同比增长率': '营收同比增长',
+            '市盈率(pe)': 'PE',
+            '市净率(pb)': 'PB',
+            '市销率(ps)': 'PS',
+            '每股净资产bps': '每股净资产',
+            '基本每股收益': 'EPS',
+            '营业总收入': '营业总收入',
+            '非经常性损益': '非经常损益',
+            '最新涨跌幅': '涨跌幅',
+            '股票代码': '代码',
+            '股票简称': '名称',
+            '预测市盈率(pe,最新预测)': '预测PE',
+        }
+        for long, s in replacements.items():
+            if long in short.lower() or long in short:
+                short = short.replace(long, s)
+                break
+            if long.lower() in short.lower():
+                short = s
+                break
+        col_rename[c] = short
+    df = df.rename(columns=col_rename)
 
     def clean_value(v):
         if v is None:
             return None
         if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
             return None
+        # 浮点数保留2位
+        if isinstance(v, float):
+            return round(v, 2)
         return v
 
     clean_data = [[clean_value(cell) for cell in row] for row in df.values.tolist()]
@@ -179,6 +250,95 @@ def screen():
     }, ensure_ascii=False)
 
     return Response(result_json, content_type="application/json; charset=utf-8")
+
+
+@app.route("/api/recommend", methods=["GET"])
+def recommend():
+    """AI 每日推荐：用问财拿今日数据，DeepSeek 分析出12只"""
+    # 第一步：从问财获取今日市场数据
+    queries = [
+        "今日涨幅前30且市盈率大于0且市盈率小于50且扣非净利润大于0，显示最新价、涨跌幅、成交额、换手率、市盈率、市净率、营收同比增长率、净利率、毛利率",
+        "今日成交额前30且市盈率大于0且市盈率小于50且扣非净利润大于0，显示最新价、涨跌幅、成交额、换手率、市盈率、市净率、营收同比增长率、净利率、毛利率",
+    ]
+    all_rows = []
+    for q in queries:
+        try:
+            result = pywencai.get(query=q)
+            if result is None:
+                continue
+            df = result
+            if isinstance(result, dict):
+                for v in result.values():
+                    if isinstance(v, pd.DataFrame):
+                        df = v
+                        break
+            if isinstance(df, pd.DataFrame) and not df.empty:
+                all_rows.append(df.head(30).to_string())
+        except Exception:
+            continue
+
+    if not all_rows:
+        return jsonify({"error": "无法获取今日市场数据"}), 500
+
+    market_data = "\n\n".join(all_rows)
+
+    # 第二步：DeepSeek 分析
+    prompt = f"""你是一个专业的A股短线交易分析师。根据以下今日A股市场数据，选出最值得关注的12只股票。
+
+要求：
+1. 综合考虑涨幅趋势、成交量、估值合理性、基本面
+2. 偏好：有资金流入、估值不贵、业绩有支撑的股票
+3. 避免：纯炒作无业绩支撑的、涨幅已经过高的
+4. 每只股票的推荐理由必须具体充分（30-50字），要说明具体的财务数据亮点，例如"PE仅12倍低于行业均值，净利率18.5%持续改善，营收同比增长25%成长性好，成交额放大资金关注度高"
+5. price和change字段必须是数字，不能缺失。如果数据中找不到准确数字就根据数据合理估算
+6. 必须严格返回JSON格式，不要返回其他内容
+
+返回格式（严格JSON数组，12个元素）：
+[
+  {{
+    "code": "股票代码",
+    "name": "股票名称",
+    "price": 最新价数字,
+    "change": 涨跌幅数字,
+    "reason": "具体充分的推荐理由（30-50字，包含具体数据）",
+    "signal": "看多/观望/谨慎"
+  }}
+]
+
+今日市场数据：
+{market_data[:8000]}
+"""
+
+    try:
+        resp = ds_client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=4000,
+        )
+        content = resp.choices[0].message.content.strip()
+        # 提取JSON部分
+        if "```" in content:
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+            content = content.strip()
+        stocks = json.loads(content)
+        # 过滤掉数据缺失的（price或change为空/None/非数字）
+        valid = []
+        for s in stocks:
+            try:
+                p = float(s.get("price", 0))
+                c = float(s.get("change", 0))
+                if p > 0:
+                    s["price"] = round(p, 2)
+                    s["change"] = round(c, 2)
+                    valid.append(s)
+            except (TypeError, ValueError):
+                continue
+        return jsonify({"stocks": valid[:12]})
+    except Exception as e:
+        return jsonify({"error": f"AI分析失败: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
