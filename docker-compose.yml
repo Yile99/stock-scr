@@ -7,3 +7,8 @@ services:
       - "3010:3010"
     environment:
       - FLASK_DEBUG=0
+    volumes:
+      - cache-data:/app/cache
+
+volumes:
+  cache-data:
